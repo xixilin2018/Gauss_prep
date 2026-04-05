@@ -13,7 +13,6 @@ A progressive web app (PWA) to help students prepare for the Gauss Mathematics C
 - **PWA Support**: Can be installed to home screen like a native app
 - **PDF Import**: Import CEMC Gauss past contest papers directly from PDF
 - **Help & Difficulty Guide**: Compare Gauss 7 vs Gauss 8 difficulty levels
-- **PDF Import**: Import CEMC Gauss past contest papers directly from PDF
 
 ## File Structure
 
@@ -59,7 +58,6 @@ Currently includes 5 sample problems. To add more:
 - [ ] Multi-user profiles for family use
 - [ ] Detailed topic filtering (Number Theory, Geometry, etc.)
 - [ ] Leaderboard and achievements
-- [ ] Adaptive difficulty based on performance
 - [ ] Audio feedback and notifications
 - [ ] Cloud sync for cross-device progress
 
