@@ -24,6 +24,7 @@ const nextBtn = document.getElementById('next-btn');
 const timerDiv = document.getElementById('timer');
 const timeRemainingSpan = document.getElementById('time-remaining');
 const helpBtn = document.getElementById('help-btn');
+const batchDownloadBtn = document.getElementById('batch-download-btn');
 const helpContainer = document.getElementById('help-container');
 
 // Update display
@@ -43,6 +44,7 @@ document.getElementById('progress-btn').addEventListener('click', showProgress);
 document.getElementById('reset-progress').addEventListener('click', resetProgress);
 importBtn.addEventListener('click', () => pdfInput.click());
 downloadCemcBtn.addEventListener('click', openCemcDownloadPage);
+batchDownloadBtn.addEventListener('click', batchDownloadGaussPdfs);
 helpBtn.addEventListener('click', showHelp);
 pdfInput.addEventListener('change', handlePdfFile);
 submitBtn.addEventListener('click', submitAnswer);
@@ -127,19 +129,28 @@ async function handlePdfFile(event) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
   importFeedback.textContent = 'Importing PDF...';
+  console.log('PDF file selected:', file.name);
+  
   try {
     const arrayBuffer = await file.arrayBuffer();
+    console.log('File read successfully, size:', arrayBuffer.byteLength);
+    
     const importedProblems = await parsePdfFile(arrayBuffer);
+    console.log('Parsed problems:', importedProblems.length);
+    
     if (!importedProblems.length) {
-      importFeedback.textContent = 'No problems were found in the selected PDF.';
+      importFeedback.textContent = 'No problems found in PDF. The PDF format may not be compatible. Try manually adding problems to problems.js.';
+      console.warn('No problems parsed from PDF');
       return;
     }
+    
     problems.unshift(...importedProblems);
     currentProblems = [...problems];
-    importFeedback.textContent = `Imported ${importedProblems.length} problems from PDF.`;
+    importFeedback.textContent = `✓ Successfully imported ${importedProblems.length} problems from PDF!`;
+    console.log('Problems imported successfully');
   } catch (error) {
-    console.error(error);
-    importFeedback.textContent = 'Failed to import PDF. Please try a different file.';
+    console.error('PDF Import Error:', error);
+    importFeedback.textContent = `Error: ${error.message}. Try manually adding problems to problems.js instead.`;
   } finally {
     pdfInput.value = '';
   }
@@ -147,6 +158,23 @@ async function handlePdfFile(event) {
 
 function openCemcDownloadPage() {
   window.open('https://www.cemc.uwaterloo.ca/contests/gauss/', '_blank');
+}
+
+function batchDownloadGaussPdfs() {
+  // Direct user to manual download since batch download has popup blocker issues
+  const baseUrl = 'https://cemc.uwaterloo.ca/sites/default/files/documents/2025/';
+  const message = `Download these PDFs manually and then use Import PDF:
+  
+Gauss 7: ${baseUrl}2025Gauss7Contest.pdf
+Gauss 7 Solutions: ${baseUrl}2025Gauss7SolutionSet.pdf
+
+Gauss 8: ${baseUrl}2025Gauss8Contest.pdf
+Gauss 8 Solutions: ${baseUrl}2025Gauss8SolutionSet.pdf
+
+Pascal: ${baseUrl}2025PascalContest.pdf
+Pascal Solutions: ${baseUrl}2025PascalSolutionSet.pdf`;
+
+  alert(message);
 }
 
 async function parsePdfFile(arrayBuffer) {

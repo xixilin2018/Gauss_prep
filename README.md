@@ -29,13 +29,14 @@ Gauss_prep/
 ## How to Use
 
 1. Open `index.html` in a modern browser (Chrome, Safari, Firefox)
-2. Click **Download CEMC PDFs** to open the official Gauss contest page. Navigate to "Past Contests" to download PDFs.
-3. Download a PDF contest paper and answer key.
-4. Click **Import PDF** and choose the downloaded PDF. The app will attempt to load questions and the answer key from the file.
-5. On iPad, open in Safari and tap "Share" → "Add to Home Screen" for PWA experience
-6. Choose Practice Mode for unlimited practice or Timed Test for contest simulation
-7. Progress is saved automatically to device storage
-8. If the PDF answer key cannot be parsed, the imported questions will still load for review mode.
+2. Click **Batch Download All Gauss PDFs** to open all Gauss contest PDFs (7, 8, 9) and Pascal in new tabs for quick download.
+3. Alternatively, click **Download CEMC PDFs** to browse the Gauss contest page manually.
+4. Download a PDF contest paper and answer key.
+5. Click **Import PDF** and choose the downloaded PDF. The app will attempt to load questions and the answer key from the file.
+6. On iPad, open in Safari and tap "Share" → "Add to Home Screen" for PWA experience
+7. Choose Practice Mode for unlimited practice or Timed Test for contest simulation
+8. Progress is saved automatically to device storage
+9. If the PDF answer key cannot be parsed, the imported questions will still load for review mode.
 
 ## Problem Database
 
