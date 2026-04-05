@@ -6,10 +6,14 @@ A progressive web app (PWA) to help students prepare for the Gauss Mathematics C
 
 - **Practice Mode**: Answer randomized Gauss problems with immediate feedback and explanations
 - **Timed Test Mode**: 10-minute timed tests to simulate contest conditions
+- **Adaptive Difficulty**: Automatically adjusts difficulty (1-10) based on performance using a simple algorithm
 - **Progress Tracking**: Track correct answers, streaks, and earned points
 - **Local Storage**: Progress saves automatically in the browser (offline capable)
 - **iPad Optimized**: Responsive design perfect for iPad and touch devices
 - **PWA Support**: Can be installed to home screen like a native app
+- **PDF Import**: Import CEMC Gauss past contest papers directly from PDF
+- **Help & Difficulty Guide**: Compare Gauss 7 vs Gauss 8 difficulty levels
+- **PDF Import**: Import CEMC Gauss past contest papers directly from PDF
 
 ## File Structure
 
@@ -26,9 +30,12 @@ Gauss_prep/
 ## How to Use
 
 1. Open `index.html` in a modern browser (Chrome, Safari, Firefox)
-2. On iPad, open in Safari and tap "Share" → "Add to Home Screen" for PWA experience
-3. Choose Practice Mode for unlimited practice or Timed Test for contest simulation
-4. Progress is saved automatically to device storage
+2. Click **Download CEMC PDFs** to open the official contest archive page.
+3. Click **Import PDF** and choose a CEMC Gauss contest paper PDF. The app will attempt to load questions and the answer key from the file.
+4. On iPad, open in Safari and tap "Share" → "Add to Home Screen" for PWA experience
+5. Choose Practice Mode for unlimited practice or Timed Test for contest simulation
+6. Progress is saved automatically to device storage
+7. If the PDF answer key cannot be parsed, the imported questions will still load for review mode.
 
 ## Problem Database
 
@@ -36,6 +43,7 @@ Currently includes 5 sample problems. To add more:
 
 1. Edit `problems.js`
 2. Add new problem objects with this structure:
+
    ```javascript
    {
      id: 6,
@@ -48,7 +56,6 @@ Currently includes 5 sample problems. To add more:
 
 ## Future Enhancements
 
-- [ ] Load problems from CEMC past contest papers (PDF parsing)
 - [ ] Multi-user profiles for family use
 - [ ] Detailed topic filtering (Number Theory, Geometry, etc.)
 - [ ] Leaderboard and achievements

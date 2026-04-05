@@ -20,7 +20,10 @@
         <button id="practice-btn">Practice Mode</button>
         <button id="timed-btn">Timed Test (10 min)</button>
         <button id="progress-btn">View Progress</button>
-      </div>
+        <button id="import-pdf-btn">Import PDF</button>
+        <button id="download-cemc-btn">Download CEMC PDFs</button>        <button id=\"help-btn\">Help & Difficulty Guide</button>      </div>
+      <div id="import-feedback" class="import-feedback"></div>
+      <input id="pdf-input" type="file" accept="application/pdf" style="display:none" />
       
       <div id="question-container" style="display: none;">
         <div id="question"></div>
@@ -36,13 +39,50 @@
         <p>Points: <span id="points">0</span></p>
         <button id="reset-progress">Reset Progress</button>
       </div>
-      
-      <div id="timer" style="display: none;">
+            <div id=\"help-container\" style=\"display: none;\">
+        <h2>Difficulty Guide: Gauss 7 vs Gauss 8</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>Gauss 7</th>
+              <th>Gauss 8</th>
+              <th>Key Difference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Algebra</td>
+              <td>Basic patterns/variables.</td>
+              <td>Linear equations/ratios.</td>
+              <td>Higher abstraction.</td>
+            </tr>
+            <tr>
+              <td>Geometry</td>
+              <td>Area, perimeter, angles.</td>
+              <td>3D shapes, Pythagorean Theorem.</td>
+              <td>Spatial visualization.</td>
+            </tr>
+            <tr>
+              <td>Calculation</td>
+              <td>Direct, high mental math.</td>
+              <td>Multi-step, tedious in Part C.</td>
+              <td>Focuses on precision.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p><strong>Adaptive Difficulty:</strong> The app adjusts difficulty (1-10) based on your performance. 3 correct answers in a row increases difficulty; 1 wrong decreases it.</p>
+      </div>
+            <div id="timer" style="display: none;">
         Time remaining: <span id="time-remaining">10:00</span>
       </div>
     </main>
   </div>
   
+  <script src="https://unpkg.com/pdfjs-dist/build/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist/build/pdf.worker.min.js';
+  </script>
   <script src="problems.js"></script>
   <script src="app.js"></script>
 </body>
