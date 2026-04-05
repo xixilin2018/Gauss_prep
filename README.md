@@ -29,7 +29,7 @@ Gauss_prep/
 ## How to Use
 
 1. Open `index.html` in a modern browser (Chrome, Safari, Firefox)
-2. Click **Download CEMC PDFs** to open the official Gauss past contests page.
+2. Click **Download CEMC PDFs** to open the official Gauss contest page. Navigate to "Past Contests" to download PDFs.
 3. Download a PDF contest paper and answer key.
 4. Click **Import PDF** and choose the downloaded PDF. The app will attempt to load questions and the answer key from the file.
 5. On iPad, open in Safari and tap "Share" → "Add to Home Screen" for PWA experience

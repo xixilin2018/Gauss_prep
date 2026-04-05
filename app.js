@@ -146,7 +146,7 @@ async function handlePdfFile(event) {
 }
 
 function openCemcDownloadPage() {
-  window.open('https://www.cemc.uwaterloo.ca/contests/gauss/past.php', '_blank');
+  window.open('https://www.cemc.uwaterloo.ca/contests/gauss/', '_blank');
 }
 
 async function parsePdfFile(arrayBuffer) {
