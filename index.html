@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gauss Prep App</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4CAF50">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Gauss Competition Prep</h1>
+      <div id="progress-display">Correct: <span id="correct-count">0</span> | Total: <span id="total-count">0</span></div>
+    </header>
+    
+    <main>
+      <div id="menu">
+        <button id="practice-btn">Practice Mode</button>
+        <button id="timed-btn">Timed Test (10 min)</button>
+        <button id="progress-btn">View Progress</button>
+      </div>
+      
+      <div id="question-container" style="display: none;">
+        <div id="question"></div>
+        <div id="options"></div>
+        <button id="submit-btn">Submit</button>
+        <div id="feedback" style="display: none;"></div>
+        <button id="next-btn" style="display: none;">Next Question</button>
+      </div>
+      
+      <div id="progress-container" style="display: none;">
+        <h2>Your Progress</h2>
+        <p>Streak: <span id="streak">0</span></p>
+        <p>Points: <span id="points">0</span></p>
+        <button id="reset-progress">Reset Progress</button>
+      </div>
+      
+      <div id="timer" style="display: none;">
+        Time remaining: <span id="time-remaining">10:00</span>
+      </div>
+    </main>
+  </div>
+  
+  <script src="problems.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

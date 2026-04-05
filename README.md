@@ -1,0 +1,91 @@
+# Gauss Prep App
+
+A progressive web app (PWA) to help students prepare for the Gauss Mathematics Competition.
+
+## Features
+
+- **Practice Mode**: Answer randomized Gauss problems with immediate feedback and explanations
+- **Timed Test Mode**: 10-minute timed tests to simulate contest conditions
+- **Progress Tracking**: Track correct answers, streaks, and earned points
+- **Local Storage**: Progress saves automatically in the browser (offline capable)
+- **iPad Optimized**: Responsive design perfect for iPad and touch devices
+- **PWA Support**: Can be installed to home screen like a native app
+
+## File Structure
+
+```
+Gauss_prep/
+├── index.html      # Main app layout
+├── styles.css      # Responsive styling for iPad
+├── app.js          # Core app logic and event handling
+├── problems.js     # Problem database with solutions
+├── manifest.json   # PWA configuration
+└── README.md       # This file
+```
+
+## How to Use
+
+1. Open `index.html` in a modern browser (Chrome, Safari, Firefox)
+2. On iPad, open in Safari and tap "Share" → "Add to Home Screen" for PWA experience
+3. Choose Practice Mode for unlimited practice or Timed Test for contest simulation
+4. Progress is saved automatically to device storage
+
+## Problem Database
+
+Currently includes 5 sample problems. To add more:
+
+1. Edit `problems.js`
+2. Add new problem objects with this structure:
+   ```javascript
+   {
+     id: 6,
+     question: "Your question here?",
+     options: ["Option A", "Option B", "Option C", "Option D"],
+     answer: "Correct Option",
+     explanation: "Explanation of why this is correct"
+   }
+   ```
+
+## Future Enhancements
+
+- [ ] Load problems from CEMC past contest papers (PDF parsing)
+- [ ] Multi-user profiles for family use
+- [ ] Detailed topic filtering (Number Theory, Geometry, etc.)
+- [ ] Leaderboard and achievements
+- [ ] Adaptive difficulty based on performance
+- [ ] Audio feedback and notifications
+- [ ] Cloud sync for cross-device progress
+
+## Technical Stack
+
+- Vanilla JavaScript (no frameworks)
+- CSS3 with responsive design
+- LocalStorage API for persistence
+- PWA (Service Worker ready - can be added later)
+
+## Browser Support
+
+- Chrome 51+
+- Safari 11+
+- Firefox 55+
+- Edge 15+
+
+## License
+
+Educational use only - based on CEMC Gauss Contest materials.
+
+## Setup Instructions
+
+1. Clone or download this repository
+2. Open `index.html` in your browser
+3. No build process or dependencies required!
+
+## Offline Usage
+
+The app works offline once loaded. All data is stored locally on your device using browser localStorage.
+
+## Notes for iPad Users
+
+- Use landscape mode for better question layout
+- Test on iPad 6th generation or newer for best experience
+- Can be used without WiFi after first load
