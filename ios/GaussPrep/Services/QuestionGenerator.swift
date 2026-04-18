@@ -3,134 +3,401 @@ import Foundation
 final class QuestionGenerator {
     func generateQuestion(difficulty: Int, preferredTopic: Topic? = nil) -> GeneratedQuestion {
         let boundedDifficulty = max(1, min(10, difficulty))
-        let topic = preferredTopic ?? Topic.allCases.randomElement() ?? .arithmetic
+        let part = part(for: boundedDifficulty)
+        let topic = preferredTopic ?? weightedTopic(for: part)
 
         switch topic {
-        case .arithmetic:
-            return generateArithmetic(difficulty: boundedDifficulty)
-        case .algebra:
-            return generateAlgebra(difficulty: boundedDifficulty)
-        case .geometry:
-            return generateGeometry(difficulty: boundedDifficulty)
-        case .numberTheory:
-            return generateNumberTheory(difficulty: boundedDifficulty)
-        case .logic:
-            return generateLogic(difficulty: boundedDifficulty)
+        case .numberSenseNumeration:
+            return generateNumberSense(difficulty: boundedDifficulty, part: part)
+        case .geometrySpatialSense:
+            return generateGeometrySpatial(difficulty: boundedDifficulty, part: part)
+        case .algebraPatterning:
+            return generateAlgebraPatterning(difficulty: boundedDifficulty, part: part)
+        case .dataManagementProbability:
+            return generateDataProbability(difficulty: boundedDifficulty, part: part)
         }
     }
 
-    private func generateArithmetic(difficulty: Int) -> GeneratedQuestion {
-        let n = Int.random(in: (5 + difficulty)...(10 + difficulty * 2))
-        let sum = n * (n + 1) / 2
-        let prompt = "What is the sum of the first \(n) positive integers?"
+    func generateQuestion(part: GaussPart, preferredTopic: Topic? = nil) -> GeneratedQuestion {
+        let difficulty: Int
+        switch part {
+        case .partA:
+            difficulty = Int.random(in: 1...3)
+        case .partB:
+            difficulty = Int.random(in: 4...7)
+        case .partC:
+            difficulty = Int.random(in: 8...10)
+        }
 
-        let options = shuffledOptions(correct: sum, spread: max(3, difficulty))
-        let correctIndex = options.firstIndex(of: String(sum)) ?? 0
-
-        return GeneratedQuestion(
-            prompt: prompt,
-            choices: options,
-            correctIndex: correctIndex,
-            explanation: "Use n(n+1)/2. Here n = \(n), so the sum is \(n) x \(n + 1) / 2 = \(sum).",
-            difficulty: difficulty,
-            topic: .arithmetic
-        )
+        return generateQuestion(difficulty: difficulty, preferredTopic: preferredTopic)
     }
 
-    private func generateAlgebra(difficulty: Int) -> GeneratedQuestion {
-        let x = Int.random(in: 2...(6 + difficulty))
-        let a = Int.random(in: 2...(5 + max(1, difficulty / 2)))
-        let b = Int.random(in: 1...(5 + difficulty))
-        let c = a * x + b
-
-        let prompt = "Solve for x: \(a)x + \(b) = \(c)"
-        let options = shuffledOptions(correct: x, spread: max(2, difficulty / 2 + 1))
-        let correctIndex = options.firstIndex(of: String(x)) ?? 0
-
-        return GeneratedQuestion(
-            prompt: prompt,
-            choices: options,
-            correctIndex: correctIndex,
-            explanation: "Subtract \(b) from both sides to get \(a)x = \(c - b). Then divide by \(a), so x = \(x).",
-            difficulty: difficulty,
-            topic: .algebra
-        )
+    private func part(for difficulty: Int) -> GaussPart {
+        switch difficulty {
+        case 1...3:
+            return .partA
+        case 4...7:
+            return .partB
+        default:
+            return .partC
+        }
     }
 
-    private func generateGeometry(difficulty: Int) -> GeneratedQuestion {
-        let width = Int.random(in: 2...(6 + difficulty))
-        let length = Int.random(in: (width + 1)...(width + 4 + difficulty))
-        let askArea = Bool.random()
+    private func weightedTopic(for part: GaussPart) -> Topic {
+        // Approximate Gauss-style emphasis: more Number Sense in early parts,
+        // more mixed/puzzle-like distribution in later parts.
+        let r = Int.random(in: 1...100)
 
-        if askArea {
-            let area = width * length
-            let prompt = "A rectangle has width \(width) cm and length \(length) cm. What is its area in cm^2?"
-            let options = shuffledOptions(correct: area, spread: max(3, difficulty))
-            let correctIndex = options.firstIndex(of: String(area)) ?? 0
+        switch part {
+        case .partA:
+            if r <= 45 { return .numberSenseNumeration }
+            if r <= 70 { return .geometrySpatialSense }
+            if r <= 90 { return .algebraPatterning }
+            return .dataManagementProbability
+        case .partB:
+            if r <= 35 { return .numberSenseNumeration }
+            if r <= 62 { return .geometrySpatialSense }
+            if r <= 85 { return .algebraPatterning }
+            return .dataManagementProbability
+        case .partC:
+            if r <= 28 { return .numberSenseNumeration }
+            if r <= 55 { return .geometrySpatialSense }
+            if r <= 80 { return .algebraPatterning }
+            return .dataManagementProbability
+        }
+    }
 
-            return GeneratedQuestion(
+    private func generateNumberSense(difficulty: Int, part: GaussPart) -> GeneratedQuestion {
+        switch part {
+        case .partA:
+            return partANumberSense(difficulty: difficulty)
+        case .partB:
+            return partBNumberSense(difficulty: difficulty)
+        case .partC:
+            return partCNumberSense(difficulty: difficulty)
+        }
+    }
+
+    private func generateGeometrySpatial(difficulty: Int, part: GaussPart) -> GeneratedQuestion {
+        switch part {
+        case .partA:
+            return partAGeometry(difficulty: difficulty)
+        case .partB:
+            return partBGeometry(difficulty: difficulty)
+        case .partC:
+            return partCGeometry(difficulty: difficulty)
+        }
+    }
+
+    private func generateAlgebraPatterning(difficulty: Int, part: GaussPart) -> GeneratedQuestion {
+        switch part {
+        case .partA:
+            return partAAlgebra(difficulty: difficulty)
+        case .partB:
+            return partBAlgebra(difficulty: difficulty)
+        case .partC:
+            return partCAlgebra(difficulty: difficulty)
+        }
+    }
+
+    private func generateDataProbability(difficulty: Int, part: GaussPart) -> GeneratedQuestion {
+        switch part {
+        case .partA:
+            return partAData(difficulty: difficulty)
+        case .partB:
+            return partBData(difficulty: difficulty)
+        case .partC:
+            return partCData(difficulty: difficulty)
+        }
+    }
+
+    private func partANumberSense(difficulty: Int) -> GeneratedQuestion {
+        if Bool.random() {
+            let percent = [10, 20, 25, 50].randomElement() ?? 25
+            let base = Int.random(in: 40...(160 + difficulty * 20))
+            let value = base * percent / 100
+            let prompt = "What is \(percent)% of \(base)?"
+            let choices = shuffledOptions(correct: value, spread: max(6, difficulty * 2))
+            return makeQuestion(
                 prompt: prompt,
-                choices: options,
-                correctIndex: correctIndex,
-                explanation: "Area of a rectangle is width x length = \(width) x \(length) = \(area).",
+                answer: value,
+                choices: choices,
+                explanation: "Convert percent to fraction: \(percent)% = \(percent)/100. Then compute \(percent)/100 x \(base) = \(value).",
                 difficulty: difficulty,
-                topic: .geometry
+                topic: .numberSenseNumeration,
+                subtopic: "Fractions, Decimals, Percentages, Ratios",
+                part: .partA
             )
         }
 
-        let perimeter = 2 * (width + length)
-        let prompt = "A rectangle has width \(width) cm and length \(length) cm. What is its perimeter in cm?"
-        let options = shuffledOptions(correct: perimeter, spread: max(4, difficulty))
-        let correctIndex = options.firstIndex(of: String(perimeter)) ?? 0
-
+        let value = Int.random(in: 100...(400 + difficulty * 40))
+        let divisor = [2, 3, 5, 9, 10].randomElement() ?? 2
+        let isDivisible = value % divisor == 0
+        let prompt = "Which statement is true about \(value)?"
+        let choices = [
+            "It is divisible by \(divisor)",
+            "It is not divisible by \(divisor)",
+            "Its greatest common divisor with \(divisor) is \(divisor + 1)",
+            "Its remainder when divided by \(divisor) is \(divisor)"
+        ]
+        let correctIndex = isDivisible ? 0 : 1
         return GeneratedQuestion(
             prompt: prompt,
-            choices: options,
+            choices: choices,
             correctIndex: correctIndex,
-            explanation: "Perimeter of a rectangle is 2 x (width + length) = 2 x (\(width) + \(length)) = \(perimeter).",
+            explanation: "Use divisibility rules or direct division. \(value) is \(isDivisible ? "" : "not ")divisible by \(divisor).",
             difficulty: difficulty,
-            topic: .geometry
+            topic: .numberSenseNumeration,
+            subtopic: "Number Theory: Divisibility",
+            part: .partA
         )
     }
 
-    private func generateNumberTheory(difficulty: Int) -> GeneratedQuestion {
-        let divisor = Int.random(in: 3...(6 + difficulty / 2))
-        let quotient = Int.random(in: 5...(12 + difficulty))
-        let remainder = Int.random(in: 1..<divisor)
-        let number = divisor * quotient + remainder
-
-        let prompt = "When \(number) is divided by \(divisor), what is the remainder?"
-        let options = shuffledOptions(correct: remainder, minValue: 0, spread: 2)
-        let correctIndex = options.firstIndex(of: String(remainder)) ?? 0
-
-        return GeneratedQuestion(
+    private func partBNumberSense(difficulty: Int) -> GeneratedQuestion {
+        let a = Int.random(in: 8...(20 + difficulty))
+        let b = Int.random(in: 6...(18 + difficulty))
+        let lcm = leastCommonMultiple(a, b)
+        let prompt = "A bell rings every \(a) minutes and another rings every \(b) minutes. If they ring together now, after how many minutes will they ring together again?"
+        let choices = shuffledOptions(correct: lcm, spread: max(8, difficulty * 2))
+        return makeQuestion(
             prompt: prompt,
-            choices: options,
-            correctIndex: correctIndex,
-            explanation: "Write \(number) = \(divisor) x \(quotient) + \(remainder), so the remainder is \(remainder).",
+            answer: lcm,
+            choices: choices,
+            explanation: "This is an LCM problem. LCM(\(a), \(b)) = \(lcm).",
             difficulty: difficulty,
-            topic: .numberTheory
+            topic: .numberSenseNumeration,
+            subtopic: "Number Theory: LCM/GCD",
+            part: .partB
         )
     }
 
-    private func generateLogic(difficulty: Int) -> GeneratedQuestion {
-        let start = Int.random(in: 2...(4 + difficulty / 2))
-        let step = Int.random(in: 2...(3 + difficulty / 3))
+    private func partCNumberSense(difficulty: Int) -> GeneratedQuestion {
+        let amount = Int.random(in: 45...(120 + difficulty * 5))
+        let discount = [10, 15, 20, 25].randomElement() ?? 15
+        let tax = [5, 8, 10, 13].randomElement() ?? 13
+        let discounted = Double(amount) * (1.0 - Double(discount) / 100.0)
+        let total = Int((discounted * (1.0 + Double(tax) / 100.0)).rounded())
+        let prompt = "A game costs $\(amount). It is discounted by \(discount)% and then taxed at \(tax)%. What is the final price, to the nearest dollar?"
+        let choices = shuffledOptions(correct: total, spread: max(8, difficulty * 3))
+        return makeQuestion(
+            prompt: prompt,
+            answer: total,
+            choices: choices,
+            explanation: "Apply discount first, then tax: \(amount) x (1 - \(discount)/100) x (1 + \(tax)/100), then round.",
+            difficulty: difficulty,
+            topic: .numberSenseNumeration,
+            subtopic: "Money & Measurement",
+            part: .partC
+        )
+    }
+
+    private func partAGeometry(difficulty: Int) -> GeneratedQuestion {
+        let width = Int.random(in: 3...(9 + difficulty))
+        let length = Int.random(in: (width + 1)...(width + 8))
+        let area = width * length
+        let prompt = "What is the area of a rectangle with width \(width) cm and length \(length) cm?"
+        let choices = shuffledOptions(correct: area, spread: max(6, difficulty * 2))
+        return makeQuestion(
+            prompt: prompt,
+            answer: area,
+            choices: choices,
+            explanation: "Area = width x length = \(width) x \(length) = \(area).",
+            difficulty: difficulty,
+            topic: .geometrySpatialSense,
+            subtopic: "Area and Perimeter",
+            part: .partA
+        )
+    }
+
+    private func partBGeometry(difficulty: Int) -> GeneratedQuestion {
+        let angle = Int.random(in: 25...70)
+        let supplementary = 180 - angle
+        let prompt = "Two parallel lines are cut by a transversal. If one interior angle is \(angle) degrees, what is its supplementary interior angle?"
+        let choices = shuffledOptions(correct: supplementary, spread: max(8, difficulty * 2))
+        return makeQuestion(
+            prompt: prompt,
+            answer: supplementary,
+            choices: choices,
+            explanation: "Interior angles on a straight line sum to 180 degrees, so 180 - \(angle) = \(supplementary).",
+            difficulty: difficulty,
+            topic: .geometrySpatialSense,
+            subtopic: "Angles and Parallel Lines",
+            part: .partB
+        )
+    }
+
+    private func partCGeometry(difficulty: Int) -> GeneratedQuestion {
+        let side = Int.random(in: 2...5)
+        let rows = Int.random(in: 3...5)
+        let cols = Int.random(in: 4...6)
+        let fits = (rows * cols) / (side * side)
+        let prompt = "A \(rows) by \(cols) grid of unit squares is tiled by \(side) by \(side) square tiles without overlap. What is the greatest number of such tiles that can fit?"
+        let choices = shuffledOptions(correct: fits, minValue: 0, spread: max(3, difficulty / 2 + 2))
+        return makeQuestion(
+            prompt: prompt,
+            answer: fits,
+            choices: choices,
+            explanation: "Each tile covers \(side * side) unit squares. The grid has \(rows * cols) unit squares, so at most floor(\(rows * cols)/\(side * side)) = \(fits).",
+            difficulty: difficulty,
+            topic: .geometrySpatialSense,
+            subtopic: "Spatial Puzzle / Packing",
+            part: .partC
+        )
+    }
+
+    private func partAAlgebra(difficulty: Int) -> GeneratedQuestion {
+        let start = Int.random(in: 2...8)
+        let step = Int.random(in: 2...6)
         let terms = [start, start + step, start + 2 * step, start + 3 * step]
-        let missing = start + 4 * step
+        let answer = start + 4 * step
+        let prompt = "Find the next term: \(terms[0]), \(terms[1]), \(terms[2]), \(terms[3]), ..."
+        let choices = shuffledOptions(correct: answer, spread: max(4, difficulty))
+        return makeQuestion(
+            prompt: prompt,
+            answer: answer,
+            choices: choices,
+            explanation: "The pattern adds \(step) each time, so the next term is \(answer).",
+            difficulty: difficulty,
+            topic: .algebraPatterning,
+            subtopic: "Sequences",
+            part: .partA
+        )
+    }
 
-        let prompt = "Find the next number in the pattern: \(terms[0]), \(terms[1]), \(terms[2]), \(terms[3]), ..."
-        let options = shuffledOptions(correct: missing, spread: max(2, difficulty / 2 + 1))
-        let correctIndex = options.firstIndex(of: String(missing)) ?? 0
+    private func partBAlgebra(difficulty: Int) -> GeneratedQuestion {
+        let x = Int.random(in: 2...(8 + difficulty))
+        let a = Int.random(in: 2...(6 + difficulty / 2))
+        let b = Int.random(in: 2...(10 + difficulty))
+        let c = a * x + b
+        let prompt = "Solve for x: \(a)x + \(b) = \(c)"
+        let choices = shuffledOptions(correct: x, spread: max(3, difficulty / 2 + 2))
+        return makeQuestion(
+            prompt: prompt,
+            answer: x,
+            choices: choices,
+            explanation: "Subtract \(b): \(a)x = \(c - b). Divide by \(a): x = \(x).",
+            difficulty: difficulty,
+            topic: .algebraPatterning,
+            subtopic: "Solving for x",
+            part: .partB
+        )
+    }
 
+    private func partCAlgebra(difficulty: Int) -> GeneratedQuestion {
+        let n = Int.random(in: 12...(40 + difficulty * 2))
+        let ruleA = Int.random(in: 2...5)
+        let ruleB = Int.random(in: 1...9)
+        let value = ruleA * n + ruleB
+        let prompt = "A pattern is defined by T(n) = \(ruleA)n + \(ruleB). What is T(\(n))?"
+        let choices = shuffledOptions(correct: value, spread: max(12, difficulty * 2))
+        return makeQuestion(
+            prompt: prompt,
+            answer: value,
+            choices: choices,
+            explanation: "Substitute n = \(n): T(\(n)) = \(ruleA)(\(n)) + \(ruleB) = \(value).",
+            difficulty: difficulty,
+            topic: .algebraPatterning,
+            subtopic: "Nth Term / Modeling",
+            part: .partC
+        )
+    }
+
+    private func partAData(difficulty: Int) -> GeneratedQuestion {
+        let values = (0..<5).map { _ in Int.random(in: 2...(12 + difficulty)) }
+        let mean = values.reduce(0, +) / values.count
+        let prompt = "Find the mean of: \(values.map(String.init).joined(separator: ", "))."
+        let choices = shuffledOptions(correct: mean, spread: max(4, difficulty))
+        return makeQuestion(
+            prompt: prompt,
+            answer: mean,
+            choices: choices,
+            explanation: "Mean = sum of values / number of values.",
+            difficulty: difficulty,
+            topic: .dataManagementProbability,
+            subtopic: "Statistics: Mean",
+            part: .partA
+        )
+    }
+
+    private func partBData(difficulty: Int) -> GeneratedQuestion {
+        let red = Int.random(in: 2...(7 + difficulty / 2))
+        let blue = Int.random(in: 2...(7 + difficulty / 2))
+        let green = Int.random(in: 2...(7 + difficulty / 2))
+        let total = red + blue + green
+        let percentBlue = Int((Double(blue) / Double(total) * 100.0).rounded())
+        let prompt = "A bag has \(red) red, \(blue) blue, and \(green) green marbles. What is the probability (as a percent) of drawing a blue marble?"
+        let choices = shuffledOptions(correct: percentBlue, minValue: 0, spread: max(8, difficulty * 2))
+        let labeledChoices = choices.map { "\($0)%" }
+        let correctIndex = labeledChoices.firstIndex(of: "\(percentBlue)%") ?? 0
         return GeneratedQuestion(
             prompt: prompt,
-            choices: options,
+            choices: labeledChoices,
             correctIndex: correctIndex,
-            explanation: "This is an arithmetic sequence with common difference \(step), so the next term is \(missing).",
+            explanation: "Probability = favorable/total = \(blue)/\(total), about \(percentBlue)%.",
             difficulty: difficulty,
-            topic: .logic
+            topic: .dataManagementProbability,
+            subtopic: "Probability",
+            part: .partB
         )
+    }
+
+    private func partCData(difficulty: Int) -> GeneratedQuestion {
+        var values = (0..<7).map { _ in Int.random(in: 5...(25 + difficulty * 2)) }.sorted()
+        if values.count % 2 == 0 {
+            values.append(Int.random(in: 5...(25 + difficulty * 2)))
+            values.sort()
+        }
+        let median = values[values.count / 2]
+        let prompt = "The sorted data set is \(values.map(String.init).joined(separator: ", ")). What is the median?"
+        let choices = shuffledOptions(correct: median, spread: max(5, difficulty))
+        return makeQuestion(
+            prompt: prompt,
+            answer: median,
+            choices: choices,
+            explanation: "With an odd number of values, the median is the middle value.",
+            difficulty: difficulty,
+            topic: .dataManagementProbability,
+            subtopic: "Statistics: Median",
+            part: .partC
+        )
+    }
+
+    private func makeQuestion(
+        prompt: String,
+        answer: Int,
+        choices: [String],
+        explanation: String,
+        difficulty: Int,
+        topic: Topic,
+        subtopic: String,
+        part: GaussPart
+    ) -> GeneratedQuestion {
+        let correctIndex = choices.firstIndex(of: String(answer)) ?? 0
+        return GeneratedQuestion(
+            prompt: prompt,
+            choices: choices,
+            correctIndex: correctIndex,
+            explanation: explanation,
+            difficulty: difficulty,
+            topic: topic,
+            subtopic: subtopic,
+            part: part
+        )
+    }
+
+    private func greatestCommonDivisor(_ a: Int, _ b: Int) -> Int {
+        var x = abs(a)
+        var y = abs(b)
+        while y != 0 {
+            let t = y
+            y = x % y
+            x = t
+        }
+        return x
+    }
+
+    private func leastCommonMultiple(_ a: Int, _ b: Int) -> Int {
+        return abs(a * b) / greatestCommonDivisor(a, b)
     }
 
     private func shuffledOptions(correct: Int, minValue: Int = 1, spread: Int) -> [String] {

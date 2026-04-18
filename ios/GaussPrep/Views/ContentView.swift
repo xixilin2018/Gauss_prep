@@ -5,22 +5,43 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
-                statsPanel
-                questionPanel
-                answerPanel
-                actionButtons
-                feedbackPanel
-                Spacer()
+            Group {
+                if viewModel.isSessionComplete {
+                    completionPanel
+                } else {
+                    VStack(alignment: .leading, spacing: 20) {
+                        modeControls
+                        statsPanel
+                        questionPanel
+                        answerPanel
+                        actionButtons
+                        feedbackPanel
+                        Spacer()
+                    }
+                    .padding(24)
+                }
             }
-            .padding(24)
             .navigationTitle("Gauss Prep")
+        }
+    }
+
+    private var modeControls: some View {
+        HStack(spacing: 10) {
+            Button("Adaptive Practice") {
+                viewModel.startAdaptivePractice()
+            }
+            .buttonStyle(.borderedProminent)
+
+            Button("Mock Contest (25)") {
+                viewModel.startMockContest()
+            }
+            .buttonStyle(.bordered)
         }
     }
 
     private var statsPanel: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Adaptive Practice")
+            Text(viewModel.mode == .mockContest ? "Timed Mock Contest" : "Adaptive Practice")
                 .font(.title2)
                 .fontWeight(.semibold)
 
@@ -31,17 +52,40 @@ struct ContentView: View {
             }
             .font(.subheadline)
             .foregroundStyle(.secondary)
+
+            if viewModel.mode == .mockContest {
+                HStack(spacing: 16) {
+                    Text("Question: \(viewModel.questionNumber)/\(viewModel.totalQuestions)")
+                    Text("Time Left: \(viewModel.timerLabel)")
+                    Text("Score: \(viewModel.mockScore)")
+                }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            }
         }
     }
 
     private var questionPanel: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(viewModel.currentQuestion.topic.title)
-                .font(.caption)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(Color.blue.opacity(0.12))
-                .clipShape(Capsule())
+            HStack(spacing: 8) {
+                Text(viewModel.currentQuestion.topic.title)
+                    .font(.caption)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.blue.opacity(0.12))
+                    .clipShape(Capsule())
+
+                Text("\(viewModel.currentQuestion.part.title): \(viewModel.currentQuestion.part.descriptor)")
+                    .font(.caption)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.orange.opacity(0.15))
+                    .clipShape(Capsule())
+            }
+
+            Text(viewModel.currentQuestion.subtopic)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
 
             Text(viewModel.currentQuestion.prompt)
                 .font(.title3)
@@ -84,8 +128,44 @@ struct ContentView: View {
                 viewModel.nextQuestion()
             }
             .buttonStyle(.bordered)
-            .disabled(!viewModel.isAnswerSubmitted)
+            .disabled(!viewModel.isAnswerSubmitted || viewModel.isSessionComplete)
         }
+    }
+
+    private var completionPanel: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Session Complete")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+
+            Text(viewModel.completionMessage)
+                .font(.title3)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Part Score Breakdown")
+                    .font(.headline)
+                Text("Part A: \(viewModel.partAScore)/\(viewModel.partAPossible)")
+                Text("Part B: \(viewModel.partBScore)/\(viewModel.partBPossible)")
+                Text("Part C: \(viewModel.partCScore)/\(viewModel.partCPossible)")
+            }
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+
+            HStack(spacing: 12) {
+                Button("Start New Mock") {
+                    viewModel.startMockContest()
+                }
+                .buttonStyle(.borderedProminent)
+
+                Button("Back To Practice") {
+                    viewModel.startAdaptivePractice()
+                }
+                .buttonStyle(.bordered)
+            }
+
+            Spacer()
+        }
+        .padding(24)
     }
 
     @ViewBuilder

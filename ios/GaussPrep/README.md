@@ -5,10 +5,12 @@ This folder contains a native SwiftUI implementation for adaptive, dynamically g
 ## What is implemented
 
 - Dynamic question generation at runtime (no question bank database required)
-- Topic coverage: Arithmetic, Algebra, Geometry, Number Theory, Logic
+- Topic coverage aligned to Gauss domains: Number Sense & Numeration, Geometry & Spatial Sense, Algebra & Patterning, Data Management & Probability
 - Adaptive difficulty (1 to 10) based on rolling accuracy
 - Local progress persistence with UserDefaults
 - iPad-friendly SwiftUI practice screen
+- Part-aware generation (Part A, Part B, Part C)
+- Timed 25-question mock contest mode with score summary
 
 ## Files
 
@@ -127,9 +129,54 @@ Notes:
 - If rolling accuracy is at most 50 percent, difficulty decreases.
 - Difficulty changes are throttled with a short cooldown to avoid oscillation.
 
+## How Topics Scale by Part
+
+The topic set remains the same, but question style changes by part:
+
+1. Part A (Foundation)
+
+- Direct, single-step prompts.
+- Example style: basic area, direct percent, direct mean.
+
+1. Part B (Connection)
+
+- Multi-step reasoning and linked concepts.
+- Example style: LCM in context, angle relationships, probability from counts.
+
+1. Part C (Ingenuity)
+
+- Puzzle-style or non-routine structure.
+- Example style: packing/tiling logic, nth-term modeling, deeper statistics reasoning.
+
+Current difficulty mapping in code:
+
+- Difficulty 1-3 -> Part A
+- Difficulty 4-7 -> Part B
+- Difficulty 8-10 -> Part C
+
+Weighted topic distribution by part:
+
+- Part A: Number Sense 45%, Geometry 25%, Algebra 20%, Data/Probability 10%
+- Part B: Number Sense 35%, Geometry 27%, Algebra 23%, Data/Probability 15%
+- Part C: Number Sense 28%, Geometry 27%, Algebra 25%, Data/Probability 20%
+
+## Mock Contest Mode
+
+- Fixed 25-question blueprint
+- Part A: 8 questions
+- Part B: 9 questions
+- Part C: 8 questions
+- 60-minute countdown timer
+- Auto-submit completion when timer reaches 0
+- Weighted scoring by part:
+- Part A correct = 5 points
+- Part B correct = 6 points
+- Part C correct = 8 points
+- Live score display during the mock
+- End-of-session summary with weighted score, accuracy, and Part A/B/C breakdown
+
 ## Next recommended additions
 
 - Add a focused Practice by Topic mode.
-- Add a timed mock contest mode (25 questions, contest-like pacing).
 - Add richer Gauss-style templates for combinatorics and advanced geometry.
 - Add analytics by topic to detect weak areas.

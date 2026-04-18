@@ -1,24 +1,49 @@
 import Foundation
 
 enum Topic: String, CaseIterable, Codable {
-    case arithmetic
-    case algebra
-    case geometry
-    case numberTheory
-    case logic
+    case numberSenseNumeration
+    case geometrySpatialSense
+    case algebraPatterning
+    case dataManagementProbability
 
     var title: String {
         switch self {
-        case .arithmetic:
-            return "Arithmetic"
-        case .algebra:
-            return "Algebra"
-        case .geometry:
-            return "Geometry"
-        case .numberTheory:
-            return "Number Theory"
-        case .logic:
-            return "Logic"
+        case .numberSenseNumeration:
+            return "Number Sense & Numeration"
+        case .geometrySpatialSense:
+            return "Geometry & Spatial Sense"
+        case .algebraPatterning:
+            return "Algebra & Patterning"
+        case .dataManagementProbability:
+            return "Data Mgmt & Probability"
+        }
+    }
+}
+
+enum GaussPart: String, Codable {
+    case partA
+    case partB
+    case partC
+
+    var title: String {
+        switch self {
+        case .partA:
+            return "Part A"
+        case .partB:
+            return "Part B"
+        case .partC:
+            return "Part C"
+        }
+    }
+
+    var descriptor: String {
+        switch self {
+        case .partA:
+            return "Foundation"
+        case .partB:
+            return "Connection"
+        case .partC:
+            return "Ingenuity"
         }
     }
 }
@@ -31,6 +56,8 @@ struct GeneratedQuestion: Identifiable, Codable {
     let explanation: String
     let difficulty: Int
     let topic: Topic
+    let subtopic: String
+    let part: GaussPart
 
     init(
         id: UUID = UUID(),
@@ -39,7 +66,9 @@ struct GeneratedQuestion: Identifiable, Codable {
         correctIndex: Int,
         explanation: String,
         difficulty: Int,
-        topic: Topic
+        topic: Topic,
+        subtopic: String,
+        part: GaussPart
     ) {
         self.id = id
         self.prompt = prompt
@@ -48,6 +77,8 @@ struct GeneratedQuestion: Identifiable, Codable {
         self.explanation = explanation
         self.difficulty = difficulty
         self.topic = topic
+        self.subtopic = subtopic
+        self.part = part
     }
 }
 
