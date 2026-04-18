@@ -2,6 +2,19 @@
 
 A progressive web app (PWA) to help students prepare for the Gauss Mathematics Competition.
 
+## Native iPad App Option
+
+A native SwiftUI iPad implementation is now included in [ios/GaussPrep/README.md](ios/GaussPrep/README.md).
+
+It includes:
+
+- Dynamic Gauss-style question generation at runtime
+- Adaptive difficulty based on rolling accuracy
+- Local progress tracking using UserDefaults
+- iPad-ready SwiftUI practice flow
+
+Use this folder if you want a true native app instead of the browser-based PWA.
+
 ## Features
 
 - **Practice Mode**: Answer randomized Gauss problems with immediate feedback and explanations
@@ -16,13 +29,21 @@ A progressive web app (PWA) to help students prepare for the Gauss Mathematics C
 
 ## File Structure
 
-```
+```text
 Gauss_prep/
 ├── index.html      # Main app layout
 ├── styles.css      # Responsive styling for iPad
 ├── app.js          # Core app logic and event handling
 ├── problems.js     # Problem database with solutions
 ├── manifest.json   # PWA configuration
+├── ios/            # Native iPad SwiftUI source files
+│   └── GaussPrep/
+│       ├── GaussPrepApp.swift
+│       ├── Models/
+│       ├── Services/
+│       ├── ViewModels/
+│       ├── Views/
+│       └── README.md
 └── README.md       # This file
 ```
 

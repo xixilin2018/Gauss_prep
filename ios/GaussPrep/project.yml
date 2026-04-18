@@ -1,0 +1,42 @@
+name: GaussPrep
+options:
+  minimumXcodeGenVersion: 2.38.0
+settings:
+  base:
+    PRODUCT_BUNDLE_IDENTIFIER: com.gaussprep.app
+    SWIFT_VERSION: 5.0
+    TARGETED_DEVICE_FAMILY: "2"
+    IPHONEOS_DEPLOYMENT_TARGET: 16.0
+targets:
+  GaussPrep:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: .
+        excludes:
+          - README.md
+          - project.yml
+          - "**/*.xcodeproj/**"
+          - "**/*.xcworkspace/**"
+    info:
+      path: Info.plist
+      properties:
+        CFBundleDisplayName: Gauss Prep
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+schemes:
+  GaussPrep:
+    build:
+      targets:
+        GaussPrep: all
+    run:
+      config: Debug
+    archive:
+      config: Release
