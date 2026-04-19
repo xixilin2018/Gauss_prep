@@ -65,8 +65,18 @@ jobs:
         with:
           xcode-version: "15.4"
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
+      - name: Install XcodeGen 2.38.0
+        run: |
+          set -eo pipefail
+          curl -L https://github.com/yonaskolb/XcodeGen/releases/download/2.38.0/xcodegen.zip -o xcodegen.zip
+          unzip -o xcodegen.zip
+          chmod +x ./bin/xcodegen
+          sudo mv ./bin/xcodegen /usr/local/bin/xcodegen
+          xcodegen --version
+
+      - name: Remove any pre-generated project
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: rm -rf GaussPrep.xcodeproj
 
       - name: Generate Xcode project
         working-directory: ${{ env.WORKING_DIRECTORY }}
