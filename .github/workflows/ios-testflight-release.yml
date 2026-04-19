@@ -68,10 +68,16 @@ jobs:
       - name: Install XcodeGen 2.38.0
         run: |
           set -eo pipefail
+          rm -rf xcodegen xcodegen.zip
           curl -L https://github.com/yonaskolb/XcodeGen/releases/download/2.38.0/xcodegen.zip -o xcodegen.zip
           unzip -o xcodegen.zip
-          chmod +x ./bin/xcodegen
-          sudo mv ./bin/xcodegen /usr/local/bin/xcodegen
+          XCODEGEN_BIN="$(find . -type f -path "*/xcodegen/bin/xcodegen" | head -n 1)"
+          if [ -z "$XCODEGEN_BIN" ]; then
+            echo "Could not locate xcodegen binary after unzip" >&2
+            exit 1
+          fi
+          chmod +x "$XCODEGEN_BIN"
+          sudo install -m 755 "$XCODEGEN_BIN" /usr/local/bin/xcodegen
           xcodegen --version
 
       - name: Remove any pre-generated project
