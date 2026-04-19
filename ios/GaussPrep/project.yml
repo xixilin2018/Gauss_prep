@@ -1,6 +1,7 @@
 name: GaussPrep
 options:
   minimumXcodeGenVersion: 2.38.0
+  xcodeVersion: "15.4"
 settings:
   base:
     PRODUCT_BUNDLE_IDENTIFIER: com.gaussprep.app
