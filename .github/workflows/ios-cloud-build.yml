@@ -55,14 +55,19 @@ jobs:
         working-directory: ios/GaussPrep
         run: |
           set -eo pipefail
-          xcodebuild \
+          mkdir -p build-artifacts
+          if ! xcodebuild \
             -project GaussPrep.xcodeproj \
             -scheme GaussPrep \
             -configuration Debug \
             -sdk iphonesimulator \
             -destination "generic/platform=iOS Simulator" \
             CODE_SIGNING_ALLOWED=NO \
-            build
+            build | tee build-artifacts/xcodebuild.log; then
+            echo "--- Extracted compiler errors ---"
+            grep -n "error:" build-artifacts/xcodebuild.log || true
+            exit 1
+          fi
 
       - name: Package simulator app
         working-directory: ios/GaussPrep
@@ -84,3 +89,11 @@ jobs:
           name: gaussprep-simulator-app
           path: ios/GaussPrep/build-artifacts/GaussPrep-simulator.app.zip
           if-no-files-found: error
+
+      - name: Upload xcodebuild log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gaussprep-xcodebuild-log
+          path: ios/GaussPrep/build-artifacts/xcodebuild.log
+          if-no-files-found: ignore
