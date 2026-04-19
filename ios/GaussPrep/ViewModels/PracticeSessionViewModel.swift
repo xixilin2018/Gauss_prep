@@ -40,9 +40,10 @@ final class PracticeSessionViewModel: ObservableObject {
     private let mockDurationSeconds = 60 * 60
 
     init() {
-        stats = storage.load()
-        adaptiveEngine = AdaptiveEngine(startingDifficulty: stats.currentDifficulty)
-        currentQuestion = generator.generateQuestion(difficulty: stats.currentDifficulty)
+        let loadedStats = storage.load()
+        stats = loadedStats
+        adaptiveEngine = AdaptiveEngine(startingDifficulty: loadedStats.currentDifficulty)
+        currentQuestion = generator.generateQuestion(difficulty: loadedStats.currentDifficulty)
     }
 
     deinit {
@@ -164,7 +165,9 @@ final class PracticeSessionViewModel: ObservableObject {
         currentQuestion = mockQuestions[0]
 
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            self?.tickTimer()
+            Task { @MainActor in
+                self?.tickTimer()
+            }
         }
     }
 
