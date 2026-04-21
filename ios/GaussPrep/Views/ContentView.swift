@@ -27,21 +27,39 @@ struct ContentView: View {
 
     private var modeControls: some View {
         HStack(spacing: 10) {
-            Button("Adaptive Practice") {
-                viewModel.startAdaptivePractice()
+            modeButton(title: "Practice Question", isSelected: viewModel.mode == .adaptivePractice) {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    viewModel.startAdaptivePractice()
+                }
             }
-            .buttonStyle(.borderedProminent)
 
-            Button("Mock Contest (25)") {
-                viewModel.startMockContest()
+            modeButton(title: "Mock Contest (25)", isSelected: viewModel.mode == .mockContest) {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    viewModel.startMockContest()
+                }
             }
-            .buttonStyle(.bordered)
         }
+    }
+
+    private func modeButton(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .fontWeight(.semibold)
+                .padding(.vertical, 10)
+                .padding(.horizontal, 14)
+                .frame(maxWidth: .infinity)
+                .foregroundStyle(isSelected ? Color.white : Color.primary)
+                .background(isSelected ? Color.blue : Color.gray.opacity(0.14))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .scaleEffect(isSelected ? 1.0 : 0.98)
+                .animation(.easeInOut(duration: 0.2), value: isSelected)
+        }
+        .buttonStyle(.plain)
     }
 
     private var statsPanel: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(viewModel.mode == .mockContest ? "Timed Mock Contest" : "Adaptive Practice")
+            Text(viewModel.mode == .mockContest ? "Timed Mock Contest" : "Practice Question")
                 .font(.title2)
                 .fontWeight(.semibold)
 
