@@ -233,10 +233,19 @@ final class QuestionGenerator {
     private func partCGeometry(difficulty: Int) -> GeneratedQuestion {
         let variant = Int.random(in: 1...7)
         if variant == 1 {
-            let prompt = "Square ABCD is divided into four identical smaller squares, then into triangles as shown. What fraction of ABCD is shaded?"
-            let choices = ["1/4", "15/32", "7/16", "3/8", "7/8"]
-            let correctIndex = choices.firstIndex(of: "15/32") ?? 1
-            return GeneratedQuestion(prompt: prompt, choices: choices, correctIndex: correctIndex, explanation: "Break into congruent triangles and add shaded pieces.", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Shaded Area", part: .partC)
+            let side = Int.random(in: 8...14)
+            let cut = Int.random(in: 2...(side / 2))
+            let shaded = side * side - cut * cut
+            let prompt = "A square has side length \(side) cm. A smaller square of side \(cut) cm is removed from one corner. What fraction of the original square is shaded?"
+            let choices = [
+                "\(shaded)/\(side * side)",
+                "\(cut * cut)/\(side * side)",
+                "\(shaded + cut)/\(side * side)",
+                "\(shaded)/\(side)",
+                "\(side * side)/\(shaded)"
+            ].shuffled()
+            let correctIndex = choices.firstIndex(of: "\(shaded)/\(side * side)") ?? 0
+            return GeneratedQuestion(prompt: prompt, choices: choices, correctIndex: correctIndex, explanation: "Shaded fraction = (total area - removed area) / total area.", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Area Fraction", part: .partC)
         }
 
         if variant == 2 {
@@ -282,10 +291,13 @@ final class QuestionGenerator {
         }
 
         if variant == 6 {
-            let choices = ["29", "43", "66", "172", "65"]
-            let prompt = "Each new figure is formed by adding two 10x5 rectangles below the previous one. If figure n has perimeter 710 cm, what is n?"
-            let correctIndex = choices.firstIndex(of: "66") ?? 2
-            return GeneratedQuestion(prompt: prompt, choices: choices, correctIndex: correctIndex, explanation: "Build a linear perimeter model in n.", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Perimeter Sequence", part: .partC)
+            let start = Int.random(in: 30...50)
+            let step = Int.random(in: 8...14)
+            let n = Int.random(in: 14...28)
+            let perimeter = start + (n - 1) * step
+            let prompt = "A sequence of composite shapes has perimeter \(start) cm at n = 1. Each step increases perimeter by \(step) cm. If the perimeter at n is \(perimeter) cm, what is n?"
+            let choices = shuffledOptions(correct: n, minValue: 1, spread: 6)
+            return makeQuestion(prompt: prompt, answer: n, choices: choices, explanation: "Use start + (n-1)step = perimeter and solve for n.", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Perimeter Sequence", part: .partC)
         }
 
         let choices = ["39", "38", "37", "36", "35"]
@@ -367,7 +379,8 @@ final class QuestionGenerator {
     }
 
     private func partBData(difficulty: Int) -> GeneratedQuestion {
-        if Bool.random() {
+        let variant = Int.random(in: 1...6)
+        if variant == 1 {
             let x = Int.random(in: 4...14)
             let y = Int.random(in: 8...18)
             let z = Int.random(in: 10...22)
@@ -375,6 +388,153 @@ final class QuestionGenerator {
             let prompt = "The three test scores are \(x), \(y), and \(z). What is their mean?"
             let choices = shuffledOptions(correct: mean, spread: max(3, difficulty))
             return makeQuestion(prompt: prompt, answer: mean, choices: choices, explanation: "Add and divide by 3.", difficulty: difficulty, topic: .dataManagementProbability, subtopic: "Mean", part: .partB)
+        }
+
+        if variant == 2 {
+            let distances = [
+                Int.random(in: 2...5),
+                Int.random(in: 6...10),
+                Int.random(in: 9...14),
+                Int.random(in: 12...18)
+            ]
+            let points = distances.enumerated().map { index, value in
+                GraphPoint(x: Double(index), y: Double(value))
+            }
+            let increases = [
+                distances[1] - distances[0],
+                distances[2] - distances[1],
+                distances[3] - distances[2]
+            ]
+            let maxIncrease = increases.max() ?? 0
+            let correctIntervalIndex = increases.firstIndex(of: maxIncrease) ?? 0
+            let intervals = ["0-1", "1-2", "2-3"]
+            let answer = intervals[correctIntervalIndex]
+            let prompt = "The line graph shows distance from home (km) over time (hours). During which interval was the increase greatest?"
+            let choices = ["0-1", "1-2", "2-3", "All equal", "Cannot be determined"]
+            let correctIndex = choices.firstIndex(of: answer) ?? 0
+            let graph = QuestionGraph(
+                style: .line,
+                points: points,
+                xLabel: "Time (hours)",
+                yLabel: "Distance (km)",
+                title: "Distance-Time Graph"
+            )
+            return GeneratedQuestion(
+                prompt: prompt,
+                choices: choices,
+                correctIndex: correctIndex,
+                explanation: "Compare vertical increases between consecutive points.",
+                difficulty: difficulty,
+                topic: .dataManagementProbability,
+                subtopic: "Graph Interpretation",
+                part: .partB,
+                graph: graph
+            )
+        }
+
+        if variant == 3 {
+            let a = Int.random(in: 4...9)
+            let b = Int.random(in: 6...12)
+            let c = Int.random(in: 5...11)
+            let d = Int.random(in: 7...13)
+            let values = [a, b, c, d]
+            let points = values.enumerated().map { idx, value in
+                GraphPoint(x: Double(idx), y: Double(value))
+            }
+            let total = values.reduce(0, +)
+            let prompt = "The bar graph shows books read by four students in a month. How many books were read in total?"
+            let choices = shuffledOptions(correct: total, minValue: 1, spread: 8)
+            let graph = QuestionGraph(
+                style: .bar,
+                points: points,
+                xLabel: "Students A-D",
+                yLabel: "Books",
+                title: "Books Read"
+            )
+            return makeQuestion(
+                prompt: prompt,
+                answer: total,
+                choices: choices,
+                explanation: "Add all bar heights.",
+                difficulty: difficulty,
+                topic: .dataManagementProbability,
+                subtopic: "Bar Graph: Total",
+                part: .partB,
+                graph: graph
+            )
+        }
+
+        if variant == 4 {
+            let values = [
+                Int.random(in: 10...18),
+                Int.random(in: 12...20),
+                Int.random(in: 8...16),
+                Int.random(in: 14...22),
+                Int.random(in: 11...19)
+            ]
+            let points = values.enumerated().map { idx, value in
+                GraphPoint(x: Double(idx), y: Double(value))
+            }
+            let maxValue = values.max() ?? 0
+            let minValue = values.min() ?? 0
+            let range = maxValue - minValue
+            let prompt = "The bar graph shows daily temperatures over 5 days. What is the range of the temperatures?"
+            let choices = shuffledOptions(correct: range, minValue: 0, spread: 6)
+            let graph = QuestionGraph(
+                style: .bar,
+                points: points,
+                xLabel: "Day 1-5",
+                yLabel: "Temperature",
+                title: "Daily Temperatures"
+            )
+            return makeQuestion(
+                prompt: prompt,
+                answer: range,
+                choices: choices,
+                explanation: "Range = maximum value - minimum value.",
+                difficulty: difficulty,
+                topic: .dataManagementProbability,
+                subtopic: "Bar Graph: Range",
+                part: .partB,
+                graph: graph
+            )
+        }
+
+        if variant == 5 {
+            let values = [
+                Int.random(in: 3...6),
+                Int.random(in: 7...11),
+                Int.random(in: 5...9),
+                Int.random(in: 10...14),
+                Int.random(in: 8...12)
+            ]
+            let points = values.enumerated().map { idx, value in
+                GraphPoint(x: Double(idx), y: Double(value))
+            }
+            let peak = values.max() ?? 0
+            let peakIndex = values.firstIndex(of: peak) ?? 0
+            let answer = String(peakIndex + 1)
+            let prompt = "The line graph shows points scored in 5 rounds. In which round was the score highest?"
+            let choices = ["1", "2", "3", "4", "5"]
+            let correctIndex = choices.firstIndex(of: answer) ?? 0
+            let graph = QuestionGraph(
+                style: .line,
+                points: points,
+                xLabel: "Round",
+                yLabel: "Points",
+                title: "Round Scores"
+            )
+            return GeneratedQuestion(
+                prompt: prompt,
+                choices: choices,
+                correctIndex: correctIndex,
+                explanation: "Pick the round with the highest plotted point.",
+                difficulty: difficulty,
+                topic: .dataManagementProbability,
+                subtopic: "Line Graph: Maximum",
+                part: .partB,
+                graph: graph
+            )
         }
 
         let red = Int.random(in: 2...(7 + difficulty / 2))
@@ -462,7 +622,8 @@ final class QuestionGenerator {
         difficulty: Int,
         topic: Topic,
         subtopic: String,
-        part: GaussPart
+        part: GaussPart,
+        graph: QuestionGraph? = nil
     ) -> GeneratedQuestion {
         let correctIndex = choices.firstIndex(of: String(answer)) ?? 0
         return GeneratedQuestion(
@@ -473,7 +634,8 @@ final class QuestionGenerator {
             difficulty: difficulty,
             topic: topic,
             subtopic: subtopic,
-            part: part
+            part: part,
+            graph: graph
         )
     }
 

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = PracticeSessionViewModel()
+    @State private var selectedMode: SessionMode = .adaptivePractice
 
     var body: some View {
         NavigationStack {
@@ -22,46 +23,34 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("Gauss Prep")
+            .onAppear {
+                selectedMode = viewModel.mode
+            }
+            .onChange(of: viewModel.mode) { newValue in
+                selectedMode = newValue
+            }
         }
     }
 
     private var modeControls: some View {
-        HStack(spacing: 10) {
-            modeButton(title: "Practice Question", isSelected: viewModel.mode == .adaptivePractice) {
-                withAnimation(.easeInOut(duration: 0.2)) {
+        Picker("Mode", selection: $selectedMode) {
+            Text("Practice").tag(SessionMode.adaptivePractice)
+            Text("Part C").tag(SessionMode.partCPractice)
+            Text("Mock").tag(SessionMode.mockContest)
+        }
+        .pickerStyle(.segmented)
+        .onChange(of: selectedMode) { newValue in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                switch newValue {
+                case .adaptivePractice:
                     viewModel.startAdaptivePractice()
-                }
-            }
-
-            modeButton(title: "Practice Part C", isSelected: viewModel.mode == .partCPractice) {
-                withAnimation(.easeInOut(duration: 0.2)) {
+                case .partCPractice:
                     viewModel.startPartCPractice()
-                }
-            }
-
-            modeButton(title: "Mock Contest (25)", isSelected: viewModel.mode == .mockContest) {
-                withAnimation(.easeInOut(duration: 0.2)) {
+                case .mockContest:
                     viewModel.startMockContest()
                 }
             }
         }
-    }
-
-    private func modeButton(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .fontWeight(.semibold)
-                .padding(.vertical, 10)
-                .padding(.horizontal, 14)
-                .frame(maxWidth: .infinity)
-                .foregroundStyle(isSelected ? Color.white : Color.primary)
-                .background(isSelected ? Color.blue : Color.gray.opacity(0.14))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-                .scaleEffect(isSelected ? 1.0 : 0.98)
-                .animation(.easeInOut(duration: 0.2), value: isSelected)
-        }
-        .contentShape(Rectangle())
-        .buttonStyle(.plain)
     }
 
     private var statsPanel: some View {
@@ -115,6 +104,10 @@ struct ContentView: View {
             Text(viewModel.currentQuestion.prompt)
                 .font(.title3)
                 .fontWeight(.medium)
+
+            if let graph = viewModel.currentQuestion.graph {
+                GraphCardView(graph: graph)
+            }
         }
     }
 
@@ -194,6 +187,11 @@ struct ContentView: View {
                 }
                 .buttonStyle(.borderedProminent)
 
+                Button("Practice Part C") {
+                    viewModel.startPartCPractice()
+                }
+                .buttonStyle(.bordered)
+
                 Button("Back To Practice") {
                     viewModel.startAdaptivePractice()
                 }
@@ -230,6 +228,100 @@ struct ContentView: View {
         }
 
         return Color.gray.opacity(0.08)
+    }
+}
+
+private struct GraphCardView: View {
+    let graph: QuestionGraph
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let title = graph.title {
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            GraphPlotView(graph: graph)
+                .frame(height: 180)
+
+            HStack {
+                Text(graph.xLabel)
+                Spacer()
+                Text(graph.yLabel)
+            }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+        }
+        .padding(12)
+        .background(Color.gray.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+private struct GraphPlotView: View {
+    let graph: QuestionGraph
+
+    var body: some View {
+        GeometryReader { proxy in
+            let width = proxy.size.width
+            let height = proxy.size.height
+            let padding: CGFloat = 16
+            let plotWidth = max(1, width - 2 * padding)
+            let plotHeight = max(1, height - 2 * padding)
+            let maxX = max(graph.points.map { $0.x }.max() ?? 1, 1)
+            let maxY = max(graph.points.map { $0.y }.max() ?? 1, 1)
+
+            ZStack {
+                Path { path in
+                    // Y axis
+                    path.move(to: CGPoint(x: padding, y: padding))
+                    path.addLine(to: CGPoint(x: padding, y: padding + plotHeight))
+                    // X axis
+                    path.move(to: CGPoint(x: padding, y: padding + plotHeight))
+                    path.addLine(to: CGPoint(x: padding + plotWidth, y: padding + plotHeight))
+                }
+                .stroke(Color.secondary.opacity(0.6), lineWidth: 1)
+
+                if graph.style == .line {
+                    Path { path in
+                        for (index, point) in graph.points.enumerated() {
+                            let x = padding + CGFloat(point.x / maxX) * plotWidth
+                            let y = padding + plotHeight - CGFloat(point.y / maxY) * plotHeight
+                            if index == 0 {
+                                path.move(to: CGPoint(x: x, y: y))
+                            } else {
+                                path.addLine(to: CGPoint(x: x, y: y))
+                            }
+                        }
+                    }
+                    .stroke(Color.blue, lineWidth: 2)
+
+                    ForEach(Array(graph.points.enumerated()), id: \.offset) { _, point in
+                        let x = padding + CGFloat(point.x / maxX) * plotWidth
+                        let y = padding + plotHeight - CGFloat(point.y / maxY) * plotHeight
+                        Circle()
+                            .fill(Color.blue)
+                            .frame(width: 6, height: 6)
+                            .position(x: x, y: y)
+                    }
+                } else {
+                    let count = max(graph.points.count, 1)
+                    let barWidth = plotWidth / CGFloat(count) * 0.6
+                    ForEach(Array(graph.points.enumerated()), id: \.offset) { index, point in
+                        let normalized = CGFloat(point.y / maxY)
+                        let barHeight = normalized * plotHeight
+                        let xStep = plotWidth / CGFloat(count)
+                        let x = padding + xStep * CGFloat(index) + xStep * 0.5
+                        let y = padding + plotHeight - barHeight / 2
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(Color.blue.opacity(0.8))
+                            .frame(width: barWidth, height: max(1, barHeight))
+                            .position(x: x, y: y)
+                    }
+                }
+            }
+        }
     }
 }
 

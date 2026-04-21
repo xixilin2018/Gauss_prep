@@ -48,6 +48,24 @@ enum GaussPart: String, Codable {
     }
 }
 
+enum GraphStyle: String, Codable {
+    case line
+    case bar
+}
+
+struct GraphPoint: Codable {
+    let x: Double
+    let y: Double
+}
+
+struct QuestionGraph: Codable {
+    let style: GraphStyle
+    let points: [GraphPoint]
+    let xLabel: String
+    let yLabel: String
+    let title: String?
+}
+
 struct GeneratedQuestion: Identifiable, Codable {
     let id: UUID
     let prompt: String
@@ -58,6 +76,7 @@ struct GeneratedQuestion: Identifiable, Codable {
     let topic: Topic
     let subtopic: String
     let part: GaussPart
+    let graph: QuestionGraph?
 
     init(
         id: UUID = UUID(),
@@ -68,7 +87,8 @@ struct GeneratedQuestion: Identifiable, Codable {
         difficulty: Int,
         topic: Topic,
         subtopic: String,
-        part: GaussPart
+        part: GaussPart,
+        graph: QuestionGraph? = nil
     ) {
         self.id = id
         self.prompt = prompt
@@ -79,6 +99,7 @@ struct GeneratedQuestion: Identifiable, Codable {
         self.topic = topic
         self.subtopic = subtopic
         self.part = part
+        self.graph = graph
     }
 }
 

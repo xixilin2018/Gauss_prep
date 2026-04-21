@@ -1,6 +1,6 @@
 import Foundation
 
-enum SessionMode {
+enum SessionMode: String, CaseIterable {
     case adaptivePractice
     case partCPractice
     case mockContest
@@ -83,7 +83,7 @@ final class PracticeSessionViewModel: ObservableObject {
 
         if mode == .adaptivePractice {
             stats.currentDifficulty = adaptiveEngine.registerAnswer(correct: isCorrect)
-        } else {
+        } else if mode == .mockContest {
             let part = currentQuestion.part
             let partPoints = points(for: part)
 
