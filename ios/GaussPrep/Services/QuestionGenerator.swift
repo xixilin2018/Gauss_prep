@@ -138,7 +138,8 @@ final class QuestionGenerator {
             "It is divisible by \(divisor)",
             "It is not divisible by \(divisor)",
             "Its greatest common divisor with \(divisor) is \(divisor + 1)",
-            "Its remainder when divided by \(divisor) is \(divisor)"
+            "Its remainder when divided by \(divisor) is \(divisor)",
+            "It is a multiple of \(divisor + 2)"
         ]
         let correctIndex = isDivisible ? 0 : 1
         return GeneratedQuestion(
@@ -154,6 +155,24 @@ final class QuestionGenerator {
     }
 
     private func partBNumberSense(difficulty: Int) -> GeneratedQuestion {
+        if Bool.random() {
+            let n = Int.random(in: 180...(420 + difficulty * 15))
+            let prompt = "How many trailing zeros are in \(n) x 25 x 8?"
+            let product = n * 25 * 8
+            let zeros = String(product).reversed().prefix { $0 == "0" }.count
+            let choices = shuffledOptions(correct: zeros, minValue: 0, spread: 2)
+            return makeQuestion(
+                prompt: prompt,
+                answer: zeros,
+                choices: choices,
+                explanation: "A trailing zero comes from a factor of 10 = 2 x 5. Count the number of matched 2s and 5s in the product.",
+                difficulty: difficulty,
+                topic: .numberSenseNumeration,
+                subtopic: "Number Theory: Prime Factors",
+                part: .partB
+            )
+        }
+
         let a = Int.random(in: 8...(20 + difficulty))
         let b = Int.random(in: 6...(18 + difficulty))
         let lcm = leastCommonMultiple(a, b)
@@ -172,6 +191,27 @@ final class QuestionGenerator {
     }
 
     private func partCNumberSense(difficulty: Int) -> GeneratedQuestion {
+        if Bool.random() {
+            let a = Int.random(in: 11...19)
+            let b = Int.random(in: 11...19)
+            let c = Int.random(in: 11...19)
+            let value = a * b * c
+            let mod = Int.random(in: 6...12)
+            let remainder = value % mod
+            let prompt = "What is the remainder when \(a) x \(b) x \(c) is divided by \(mod)?"
+            let choices = shuffledOptions(correct: remainder, minValue: 0, spread: 3)
+            return makeQuestion(
+                prompt: prompt,
+                answer: remainder,
+                choices: choices,
+                explanation: "You can reduce factors modulo \(mod) before multiplying to simplify.",
+                difficulty: difficulty,
+                topic: .numberSenseNumeration,
+                subtopic: "Number Theory: Modular Arithmetic",
+                part: .partC
+            )
+        }
+
         let amount = Int.random(in: 45...(120 + difficulty * 5))
         let discount = [10, 15, 20, 25].randomElement() ?? 15
         let tax = [5, 8, 10, 13].randomElement() ?? 13
@@ -210,6 +250,24 @@ final class QuestionGenerator {
     }
 
     private func partBGeometry(difficulty: Int) -> GeneratedQuestion {
+        if Bool.random() {
+            let side = Int.random(in: 4...9)
+            let cut = Int.random(in: 1...(side - 1))
+            let remainingArea = side * side - cut * cut
+            let prompt = "A square of side \(side) cm has a smaller square of side \(cut) cm removed from one corner. What is the remaining area?"
+            let choices = shuffledOptions(correct: remainingArea, spread: max(4, difficulty * 2))
+            return makeQuestion(
+                prompt: prompt,
+                answer: remainingArea,
+                choices: choices,
+                explanation: "Subtract areas: \(side)^2 - \(cut)^2 = \(remainingArea).",
+                difficulty: difficulty,
+                topic: .geometrySpatialSense,
+                subtopic: "Composite Area",
+                part: .partB
+            )
+        }
+
         let angle = Int.random(in: 25...70)
         let supplementary = 180 - angle
         let prompt = "Two parallel lines are cut by a transversal. If one interior angle is \(angle) degrees, what is its supplementary interior angle?"
@@ -227,6 +285,31 @@ final class QuestionGenerator {
     }
 
     private func partCGeometry(difficulty: Int) -> GeneratedQuestion {
+        if Bool.random() {
+            let sides = [5, 6, 8, 10, 12].randomElement() ?? 6
+            let interior = (sides - 2) * 180 / sides
+            let prompt = "Each interior angle of a regular polygon is \(interior) degrees. How many sides does the polygon have?"
+            let choices = [4, 5, 6, 8, 10, 12]
+                .shuffled()
+                .prefix(5)
+                .map(String.init)
+            var finalChoices = choices
+            if !finalChoices.contains(String(sides)) {
+                finalChoices[0] = String(sides)
+                finalChoices.shuffle()
+            }
+            return makeQuestion(
+                prompt: prompt,
+                answer: sides,
+                choices: finalChoices,
+                explanation: "Use interior angle formula: (n-2)180/n = \(interior), then solve for n.",
+                difficulty: difficulty,
+                topic: .geometrySpatialSense,
+                subtopic: "Angles in Polygons",
+                part: .partC
+            )
+        }
+
         let side = Int.random(in: 2...5)
         let rows = Int.random(in: 3...5)
         let cols = Int.random(in: 4...6)
@@ -265,6 +348,23 @@ final class QuestionGenerator {
     }
 
     private func partBAlgebra(difficulty: Int) -> GeneratedQuestion {
+        if Bool.random() {
+            let n = Int.random(in: 4...10)
+            let expression = 3 * n - 2
+            let prompt = "If n = \(n), what is 3n - 2?"
+            let choices = shuffledOptions(correct: expression, spread: max(4, difficulty))
+            return makeQuestion(
+                prompt: prompt,
+                answer: expression,
+                choices: choices,
+                explanation: "Substitute n = \(n) into the expression.",
+                difficulty: difficulty,
+                topic: .algebraPatterning,
+                subtopic: "Modeling Expressions",
+                part: .partB
+            )
+        }
+
         let x = Int.random(in: 2...(8 + difficulty))
         let a = Int.random(in: 2...(6 + difficulty / 2))
         let b = Int.random(in: 2...(10 + difficulty))
@@ -284,6 +384,25 @@ final class QuestionGenerator {
     }
 
     private func partCAlgebra(difficulty: Int) -> GeneratedQuestion {
+        if Bool.random() {
+            let first = Int.random(in: 2...8)
+            let diff = Int.random(in: 3...7)
+            let n = Int.random(in: 15...(40 + difficulty))
+            let value = first + (n - 1) * diff
+            let prompt = "An arithmetic sequence starts at \(first) and increases by \(diff). What is the \(n)th term?"
+            let choices = shuffledOptions(correct: value, spread: max(10, difficulty * 3))
+            return makeQuestion(
+                prompt: prompt,
+                answer: value,
+                choices: choices,
+                explanation: "Use a_n = a_1 + (n-1)d.",
+                difficulty: difficulty,
+                topic: .algebraPatterning,
+                subtopic: "Nth Term (Arithmetic Sequence)",
+                part: .partC
+            )
+        }
+
         let n = Int.random(in: 12...(40 + difficulty * 2))
         let ruleA = Int.random(in: 2...5)
         let ruleB = Int.random(in: 1...9)
@@ -320,6 +439,25 @@ final class QuestionGenerator {
     }
 
     private func partBData(difficulty: Int) -> GeneratedQuestion {
+        if Bool.random() {
+            let x = Int.random(in: 4...14)
+            let y = Int.random(in: 8...18)
+            let z = Int.random(in: 10...22)
+            let mean = (x + y + z) / 3
+            let prompt = "The three test scores are \(x), \(y), and \(z). What is their mean?"
+            let choices = shuffledOptions(correct: mean, spread: max(3, difficulty))
+            return makeQuestion(
+                prompt: prompt,
+                answer: mean,
+                choices: choices,
+                explanation: "Add and divide by 3.",
+                difficulty: difficulty,
+                topic: .dataManagementProbability,
+                subtopic: "Statistics: Mean",
+                part: .partB
+            )
+        }
+
         let red = Int.random(in: 2...(7 + difficulty / 2))
         let blue = Int.random(in: 2...(7 + difficulty / 2))
         let green = Int.random(in: 2...(7 + difficulty / 2))
@@ -342,6 +480,28 @@ final class QuestionGenerator {
     }
 
     private func partCData(difficulty: Int) -> GeneratedQuestion {
+        if Bool.random() {
+            let red = Int.random(in: 3...8)
+            let blue = Int.random(in: 3...8)
+            let green = Int.random(in: 3...8)
+            let total = red + blue + green
+            let favorable = blue + green
+            let percent = Int((Double(favorable) / Double(total) * 100.0).rounded())
+            let prompt = "A jar has \(red) red, \(blue) blue, and \(green) green marbles. What is the probability (as a percent) of drawing a non-red marble?"
+            let choices = shuffledOptions(correct: percent, minValue: 0, spread: 8).map { "\($0)%" }
+            let correctIndex = choices.firstIndex(of: "\(percent)%") ?? 0
+            return GeneratedQuestion(
+                prompt: prompt,
+                choices: choices,
+                correctIndex: correctIndex,
+                explanation: "Non-red means blue or green, so probability is (\(blue)+\(green))/\(total).",
+                difficulty: difficulty,
+                topic: .dataManagementProbability,
+                subtopic: "Probability (Complement)",
+                part: .partC
+            )
+        }
+
         var values = (0..<7).map { _ in Int.random(in: 5...(25 + difficulty * 2)) }.sorted()
         if values.count % 2 == 0 {
             values.append(Int.random(in: 5...(25 + difficulty * 2)))
@@ -404,7 +564,7 @@ final class QuestionGenerator {
         var values = Set<Int>()
         values.insert(correct)
 
-        while values.count < 4 {
+        while values.count < 5 {
             let offset = Int.random(in: -spread...spread)
             let candidate = max(minValue, correct + offset)
             values.insert(candidate)
