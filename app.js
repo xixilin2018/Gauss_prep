@@ -8,6 +8,7 @@ let points = parseInt(localStorage.getItem('points')) || 0;
 let timerInterval;
 let timeRemaining = 600; // 10 minutes in seconds
 let isTimedMode = false;
+let isPartCMode = false;
 let currentDifficulty = parseInt(localStorage.getItem('currentDifficulty')) || 5; // Start at medium difficulty
 let consecutiveCorrect = 0;
 let consecutiveWrong = 0;
@@ -23,6 +24,7 @@ const feedbackDiv = document.getElementById('feedback');
 const nextBtn = document.getElementById('next-btn');
 const timerDiv = document.getElementById('timer');
 const timeRemainingSpan = document.getElementById('time-remaining');
+const sessionModeDiv = document.getElementById('session-mode');
 const helpBtn = document.getElementById('help-btn');
 const batchDownloadBtn = document.getElementById('batch-download-btn');
 const helpContainer = document.getElementById('help-container');
@@ -39,6 +41,7 @@ updateDisplay();
 
 // Event listeners
 document.getElementById('practice-btn').addEventListener('click', startPractice);
+document.getElementById('partc-btn').addEventListener('click', startPartCPractice);
 document.getElementById('timed-btn').addEventListener('click', startTimedTest);
 document.getElementById('progress-btn').addEventListener('click', showProgress);
 document.getElementById('reset-progress').addEventListener('click', resetProgress);
@@ -52,6 +55,7 @@ nextBtn.addEventListener('click', nextQuestion);
 
 function startPractice() {
   isTimedMode = false;
+  isPartCMode = false;
   currentProblems = [...problems].filter(p => p.level === currentDifficulty).sort(() => Math.random() - 0.5);
   if (currentProblems.length === 0) {
     currentProblems = [...problems].sort(() => Math.random() - 0.5); // Fallback to all problems
@@ -60,12 +64,39 @@ function startPractice() {
   menu.style.display = 'none';
   progressContainer.style.display = 'none';
   timerDiv.style.display = 'none';
+  setSessionModeLabel('Practice Mode');
+  questionContainer.style.display = 'block';
+  showQuestion();
+}
+
+function startPartCPractice() {
+  isTimedMode = false;
+  isPartCMode = true;
+  currentProblems = [...problems]
+    .filter(p => p.level >= 8)
+    .sort(() => Math.random() - 0.5);
+
+  if (currentProblems.length === 0) {
+    // Fallback: use the top-difficulty slice so this mode is always usable.
+    const sortedByDifficulty = [...problems].sort((a, b) => b.level - a.level);
+    const cutoff = sortedByDifficulty[Math.max(0, Math.floor(sortedByDifficulty.length * 0.4) - 1)]?.level ?? 1;
+    currentProblems = sortedByDifficulty
+      .filter(p => p.level >= cutoff)
+      .sort(() => Math.random() - 0.5);
+  }
+
+  currentIndex = 0;
+  menu.style.display = 'none';
+  progressContainer.style.display = 'none';
+  timerDiv.style.display = 'none';
+  setSessionModeLabel('Part C Practice');
   questionContainer.style.display = 'block';
   showQuestion();
 }
 
 function startTimedTest() {
   isTimedMode = true;
+  isPartCMode = false;
   timeRemaining = 600;
   currentProblems = [...problems].sort(() => Math.random() - 0.5);
   currentIndex = 0;
@@ -73,8 +104,19 @@ function startTimedTest() {
   progressContainer.style.display = 'none';
   questionContainer.style.display = 'block';
   timerDiv.style.display = 'block';
+  setSessionModeLabel('Timed Test');
   startTimer();
   showQuestion();
+}
+
+function setSessionModeLabel(text) {
+  if (!text) {
+    sessionModeDiv.style.display = 'none';
+    sessionModeDiv.textContent = '';
+    return;
+  }
+  sessionModeDiv.textContent = text;
+  sessionModeDiv.style.display = 'inline-block';
 }
 
 function showProgress() {
@@ -82,6 +124,7 @@ function showProgress() {
   questionContainer.style.display = 'none';
   timerDiv.style.display = 'none';
   helpContainer.style.display = 'none';
+  setSessionModeLabel('');
   progressContainer.style.display = 'block';
 }
 
@@ -90,6 +133,7 @@ function showHelp() {
   questionContainer.style.display = 'none';
   timerDiv.style.display = 'none';
   progressContainer.style.display = 'none';
+  setSessionModeLabel('');
   helpContainer.style.display = 'block';
 }
 
@@ -390,8 +434,15 @@ function endSession() {
   questionContainer.style.display = 'none';
   timerDiv.style.display = 'none';
   helpContainer.style.display = 'none';
+  setSessionModeLabel('');
   menu.style.display = 'block';
-  alert(isTimedMode ? 'Timed test completed!' : 'Practice session completed!');
+  if (isTimedMode) {
+    alert('Timed test completed!');
+  } else if (isPartCMode) {
+    alert('Part C practice session completed!');
+  } else {
+    alert('Practice session completed!');
+  }
 }
 
 // Initialize
