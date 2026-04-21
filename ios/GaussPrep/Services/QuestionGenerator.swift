@@ -112,46 +112,62 @@ final class QuestionGenerator {
     }
 
     private func partANumberSense(difficulty: Int) -> GeneratedQuestion {
-        if Bool.random() {
+        let variant = Int.random(in: 1...3)
+        if variant == 1 {
+            // Two-step percent (e.g., percent of a sum)
+            let a = Int.random(in: 20...(80 + difficulty * 10))
+            let b = Int.random(in: 20...(80 + difficulty * 10))
             let percent = [10, 20, 25, 50].randomElement() ?? 25
-            let base = Int.random(in: 40...(160 + difficulty * 20))
-            let value = base * percent / 100
-            let prompt = "What is \(percent)% of \(base)?"
+            let sum = a + b
+            let value = sum * percent / 100
+            let prompt = "What is \(percent)% of (\(a) + \(b))?"
             let choices = shuffledOptions(correct: value, spread: max(6, difficulty * 2))
             return makeQuestion(
                 prompt: prompt,
                 answer: value,
                 choices: choices,
-                explanation: "Convert percent to fraction: \(percent)% = \(percent)/100. Then compute \(percent)/100 x \(base) = \(value).",
+                explanation: "First add: \(a)+\(b)=\(sum). Then \(percent)% of \(sum) = \(value).",
                 difficulty: difficulty,
                 topic: .numberSenseNumeration,
-                subtopic: "Fractions, Decimals, Percentages, Ratios",
+                subtopic: "Percent of a Sum",
+                part: .partA
+            )
+        } else if variant == 2 {
+            // Small divisor puzzle (trap: remainder)
+            let value = Int.random(in: 100...(400 + difficulty * 40))
+            let divisor = [3, 4, 6, 7, 8].randomElement() ?? 3
+            let remainder = value % divisor
+            let prompt = "What is the remainder when \(value) is divided by \(divisor)?"
+            let choices = shuffledOptions(correct: remainder, minValue: 0, spread: max(3, difficulty))
+            return makeQuestion(
+                prompt: prompt,
+                answer: remainder,
+                choices: choices,
+                explanation: "Divide \(value) by \(divisor): remainder is \(remainder).",
+                difficulty: difficulty,
+                topic: .numberSenseNumeration,
+                subtopic: "Division Remainder",
+                part: .partA
+            )
+        } else {
+            // Multi-step: Find a number given area and perimeter
+            let width = Int.random(in: 3...(9 + difficulty))
+            let length = Int.random(in: (width + 1)...(width + 8))
+            let area = width * length
+            let perimeter = 2 * (width + length)
+            let prompt = "A rectangle has area \(area) cm² and perimeter \(perimeter) cm. What is its width?"
+            let choices = shuffledOptions(correct: width, spread: max(4, difficulty))
+            return makeQuestion(
+                prompt: prompt,
+                answer: width,
+                choices: choices,
+                explanation: "Let width = w, length = l. Area = w*l, perimeter = 2(w+l). Solve for w.",
+                difficulty: difficulty,
+                topic: .numberSenseNumeration,
+                subtopic: "Area & Perimeter Reasoning",
                 part: .partA
             )
         }
-
-        let value = Int.random(in: 100...(400 + difficulty * 40))
-        let divisor = [2, 3, 5, 9, 10].randomElement() ?? 2
-        let isDivisible = value % divisor == 0
-        let prompt = "Which statement is true about \(value)?"
-        let choices = [
-            "It is divisible by \(divisor)",
-            "It is not divisible by \(divisor)",
-            "Its greatest common divisor with \(divisor) is \(divisor + 1)",
-            "Its remainder when divided by \(divisor) is \(divisor)",
-            "It is a multiple of \(divisor + 2)"
-        ]
-        let correctIndex = isDivisible ? 0 : 1
-        return GeneratedQuestion(
-            prompt: prompt,
-            choices: choices,
-            correctIndex: correctIndex,
-            explanation: "Use divisibility rules or direct division. \(value) is \(isDivisible ? "" : "not ")divisible by \(divisor).",
-            difficulty: difficulty,
-            topic: .numberSenseNumeration,
-            subtopic: "Number Theory: Divisibility",
-            part: .partA
-        )
     }
 
     private func partBNumberSense(difficulty: Int) -> GeneratedQuestion {
