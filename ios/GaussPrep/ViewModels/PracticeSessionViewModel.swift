@@ -2,6 +2,7 @@ import Foundation
 
 enum SessionMode {
     case adaptivePractice
+    case partCPractice
     case mockContest
 }
 
@@ -121,6 +122,11 @@ final class PracticeSessionViewModel: ObservableObject {
             return
         }
 
+        if mode == .partCPractice {
+            currentQuestion = generator.generateQuestion(part: .partC)
+            return
+        }
+
         currentQuestion = generator.generateQuestion(difficulty: stats.currentDifficulty)
     }
 
@@ -136,6 +142,20 @@ final class PracticeSessionViewModel: ObservableObject {
         feedbackText = ""
         isAnswerSubmitted = false
         currentQuestion = generator.generateQuestion(difficulty: stats.currentDifficulty)
+    }
+
+    func startPartCPractice() {
+        stopTimer()
+        mode = .partCPractice
+        totalQuestions = 0
+        questionNumber = 1
+        remainingSeconds = nil
+        isSessionComplete = false
+        completionMessage = ""
+        selectedChoiceIndex = nil
+        feedbackText = ""
+        isAnswerSubmitted = false
+        currentQuestion = generator.generateQuestion(part: .partC)
     }
 
     func startMockContest() {

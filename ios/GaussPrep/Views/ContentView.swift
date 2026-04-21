@@ -33,6 +33,12 @@ struct ContentView: View {
                 }
             }
 
+            modeButton(title: "Practice Part C", isSelected: viewModel.mode == .partCPractice) {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    viewModel.startPartCPractice()
+                }
+            }
+
             modeButton(title: "Mock Contest (25)", isSelected: viewModel.mode == .mockContest) {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     viewModel.startMockContest()
@@ -54,12 +60,13 @@ struct ContentView: View {
                 .scaleEffect(isSelected ? 1.0 : 0.98)
                 .animation(.easeInOut(duration: 0.2), value: isSelected)
         }
+        .contentShape(Rectangle())
         .buttonStyle(.plain)
     }
 
     private var statsPanel: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(viewModel.mode == .mockContest ? "Timed Mock Contest" : "Practice Question")
+            Text(sessionTitle)
                 .font(.title2)
                 .fontWeight(.semibold)
 
@@ -128,9 +135,21 @@ struct ContentView: View {
                     .background(backgroundColor(for: index))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
+                .contentShape(Rectangle())
                 .buttonStyle(.plain)
                 .disabled(viewModel.isAnswerSubmitted)
             }
+        }
+    }
+
+    private var sessionTitle: String {
+        switch viewModel.mode {
+        case .adaptivePractice:
+            return "Practice Question"
+        case .partCPractice:
+            return "Practice Part C"
+        case .mockContest:
+            return "Timed Mock Contest"
         }
     }
 
