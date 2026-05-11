@@ -171,10 +171,13 @@ final class QuestionGenerator {
         }
 
         if variant == 2 {
-            let count = 42
+            // 5-digit palindromes abcba with even a and 2a+2b+c ≡ 0 mod 9.
+            // For each even a ∈ {2,4,6,8}: exactly 11 valid (b,c) pairs. Total = 4×11 = 44.
+            let count = 44
             let prompt = "How many palindromes greater than 10,000 and less than 100,000 are multiples of 18?"
-            let choices = shuffledOptions(correct: count, spread: 4)
-            return makeQuestion(prompt: prompt, answer: count, choices: choices, explanation: "Use palindrome form and divisibility by 2 and 9.", difficulty: difficulty, topic: .numberSenseNumeration, subtopic: "Palindromes and Divisibility", part: .partC)
+            let choices = ["41", "42", "43", "44", "45"].shuffled()
+            let correctIndex = choices.firstIndex(of: "44") ?? 0
+            return GeneratedQuestion(prompt: prompt, choices: choices, correctIndex: correctIndex, explanation: "A 5-digit palindrome has form abcba. Divisible by 18 requires a even (last digit even) and digit sum 2a+2b+c divisible by 9. For each of 4 even values of a, there are exactly 11 valid (b,c) pairs, giving 4×11 = 44.", difficulty: difficulty, topic: .numberSenseNumeration, subtopic: "Palindromes and Divisibility", part: .partC)
         }
 
         if variant == 3 {
@@ -233,53 +236,57 @@ final class QuestionGenerator {
     private func partCGeometry(difficulty: Int) -> GeneratedQuestion {
         let variant = Int.random(in: 1...7)
         if variant == 1 {
-            let side = Int.random(in: 8...14)
-            let cut = Int.random(in: 2...(side / 2))
-            let shaded = side * side - cut * cut
-            let prompt = "A square has side length \(side) cm. A smaller square of side \(cut) cm is removed from one corner. What fraction of the original square is shaded?"
-            let choices = [
-                "\(shaded)/\(side * side)",
-                "\(cut * cut)/\(side * side)",
-                "\(shaded + cut)/\(side * side)",
-                "\(shaded)/\(side)",
-                "\(side * side)/\(shaded)"
-            ].shuffled()
-            let correctIndex = choices.firstIndex(of: "\(shaded)/\(side * side)") ?? 0
-            return GeneratedQuestion(prompt: prompt, choices: choices, correctIndex: correctIndex, explanation: "Shaded fraction = (total area - removed area) / total area.", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Area Fraction", part: .partC)
+            let n = Int.random(in: 4...8)
+            let answer = fibonacci(n + 1)
+            let prompt = "In how many ways can a 2 × \(n) rectangle be tiled completely using 1 × 2 dominoes?"
+            let choices = shuffledOptions(correct: answer, minValue: 1, spread: max(8, answer / 2))
+            return makeQuestion(prompt: prompt, answer: answer, choices: choices, explanation: "Let T(k) be the count. T(1)=1, T(2)=2, and T(k)=T(k-1)+T(k-2). So T(\(n))=\(answer).", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Domino Tiling", part: .partC)
         }
 
         if variant == 2 {
-            let sides = [5, 6, 8, 10, 12].randomElement() ?? 6
-            let interior = (sides - 2) * 180 / sides
-            let prompt = "Each interior angle of a regular polygon is \(interior) degrees. How many sides does it have?"
-            var choices = ["4", "5", "6", "8", "10", "12"].shuffled()
-            if !choices.prefix(5).contains(String(sides)) {
-                choices[0] = String(sides)
-            }
-            return makeQuestion(prompt: prompt, answer: sides, choices: Array(choices.prefix(5)), explanation: "Solve (n-2)180/n = interior.", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Regular Polygons", part: .partC)
+            let sides = [6, 7, 8, 9, 10].randomElement() ?? 8
+            let angleSum = (sides - 2) * 180
+            let diagonals = sides * (sides - 3) / 2
+            let prompt = "The interior angles of a convex polygon sum to \(angleSum) degrees. How many diagonals does the polygon have?"
+            let choices = shuffledOptions(correct: diagonals, minValue: 0, spread: 8)
+            return makeQuestion(prompt: prompt, answer: diagonals, choices: choices, explanation: "Find n from (n-2)×180 = \(angleSum) to get n=\(sides), then diagonals = n(n-3)/2 = \(diagonals).", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Polygon Diagonals", part: .partC)
         }
 
         if variant == 3 {
-            let side = Int.random(in: 2...5)
-            let rows = Int.random(in: 3...5)
-            let cols = Int.random(in: 4...6)
-            let fits = (rows * cols) / (side * side)
-            let prompt = "A \(rows) by \(cols) grid of unit squares is tiled by \(side) by \(side) tiles. What is the greatest number of tiles that can fit?"
-            let choices = shuffledOptions(correct: fits, minValue: 0, spread: max(3, difficulty / 2 + 2))
-            return makeQuestion(prompt: prompt, answer: fits, choices: choices, explanation: "Use area bound and floor.", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Packing", part: .partC)
+            // Doghouse leash problem (2021G8 Q23 style).
+            // Dog on leash length L attached to corner of square doghouse side s, with s < L < 2s.
+            // Area = (3/4)πL² + 2×(1/4)π(L-s)² = π × (3L²/4 + (L-s)²/2).
+            // Pre-computed pairs (L, s, π-coefficient) where coefficient is an integer:
+            let pairs = [(4, 2, 14), (6, 4, 29), (8, 6, 50), (10, 8, 77), (12, 10, 110)]
+            let (L, s, coeff) = pairs.randomElement()!
+            let prompt = "A dog's leash of length \(L) m is attached to a corner of a square doghouse with side \(s) m. What is the area (in multiples of π m²) outside the doghouse where the dog can roam?"
+            let correctStr = "\(coeff)π"
+            var wrongCoeffs = Set<Int>()
+            while wrongCoeffs.count < 4 {
+                let offset = Int.random(in: -5...5)
+                let candidate = coeff + offset * 2
+                if candidate > 0 && candidate != coeff { wrongCoeffs.insert(candidate) }
+            }
+            var choices = wrongCoeffs.prefix(4).map { "\($0)π" } + [correctStr]
+            choices.shuffle()
+            let correctIndex = choices.firstIndex(of: correctStr) ?? 0
+            return GeneratedQuestion(prompt: prompt, choices: choices, correctIndex: correctIndex, explanation: "Main arc (270°): (3/4)π×\(L)² = \(3*L*L/4)π. Two corner arcs (each 90°): 2×(1/4)π×\(L-s)² = \((L-s)*(L-s)/2)π. Total = \(coeff)π m².", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Leash Area", part: .partC)
         }
 
         if variant == 4 {
-            let m = Int.random(in: 5...10)
-            let n = Int.random(in: 5...10)
-            let outer = 2 * m * n + m + n
-            let inner = (m - 1) * (n - 1)
-            let total = outer + inner
+            // Toothpick grid percent (2024G7 Q22 style).
+            // For an m×n grid of squares:
+            //   Total toothpicks = n(m+1) + m(n+1) = 2mn + m + n
+            //   Inner toothpicks = n(m-1) + m(n-1) = 2mn - m - n
+            let m = Int.random(in: 8...20)
+            let n = Int.random(in: 8...20)
+            let total = 2 * m * n + m + n
+            let inner = 2 * m * n - m - n
             let percent = Int((Double(inner) / Double(total) * 100.0).rounded())
-            let prompt = "A \(m) by \(n) grid is made with toothpicks. To the nearest percent, what percent are inner toothpicks?"
+            let prompt = "Toothpicks form a \(m) × \(n) grid of unit squares. To the nearest percent, what percentage of the toothpicks are inner (not on the border)?"
             let choices = shuffledOptions(correct: percent, minValue: 0, spread: 8).map { "\($0)%" }
             let correctIndex = choices.firstIndex(of: "\(percent)%") ?? 0
-            return GeneratedQuestion(prompt: prompt, choices: choices, correctIndex: correctIndex, explanation: "Inner = (m-1)(n-1).", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Grid Counting", part: .partC)
+            return GeneratedQuestion(prompt: prompt, choices: choices, correctIndex: correctIndex, explanation: "Total toothpicks = 2mn+m+n = \(total). Inner toothpicks = n(m-1)+m(n-1) = 2mn-m-n = \(inner). Percent = \(inner)/\(total) ≈ \(percent)%.", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Grid Toothpick Count", part: .partC)
         }
 
         if variant == 5 {
@@ -291,13 +298,11 @@ final class QuestionGenerator {
         }
 
         if variant == 6 {
-            let start = Int.random(in: 30...50)
-            let step = Int.random(in: 8...14)
-            let n = Int.random(in: 14...28)
-            let perimeter = start + (n - 1) * step
-            let prompt = "A sequence of composite shapes has perimeter \(start) cm at n = 1. Each step increases perimeter by \(step) cm. If the perimeter at n is \(perimeter) cm, what is n?"
-            let choices = shuffledOptions(correct: n, minValue: 1, spread: 6)
-            return makeQuestion(prompt: prompt, answer: n, choices: choices, explanation: "Use start + (n-1)step = perimeter and solve for n.", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Perimeter Sequence", part: .partC)
+            let pythagorean = [(14, 5, 12), (28, 10, 48), (34, 13, 60), (42, 15, 108), (46, 17, 120)].randomElement()!
+            let (perimeter, diagonal, area) = pythagorean
+            let prompt = "A rectangle has perimeter \(perimeter) cm and diagonal \(diagonal) cm. What is its area in cm²?"
+            let choices = shuffledOptions(correct: area, minValue: 1, spread: max(12, area / 4))
+            return makeQuestion(prompt: prompt, answer: area, choices: choices, explanation: "Use l+w = P/2 and Area = ((P/2)² − D²)/2 = (\(perimeter/2)² − \(diagonal)²)/2 = \(area) cm².", difficulty: difficulty, topic: .geometrySpatialSense, subtopic: "Rectangle from Perimeter and Diagonal", part: .partC)
         }
 
         let choices = ["39", "38", "37", "36", "35"]
@@ -338,12 +343,12 @@ final class QuestionGenerator {
         let variant = Int.random(in: 1...4)
         if variant == 1 {
             let first = Int.random(in: 2...8)
-            let diff = Int.random(in: 3...7)
-            let n = Int.random(in: 15...(40 + difficulty))
-            let value = first + (n - 1) * diff
-            let prompt = "An arithmetic sequence starts at \(first) and increases by \(diff). What is the \(n)th term?"
-            let choices = shuffledOptions(correct: value, spread: max(10, difficulty * 3))
-            return makeQuestion(prompt: prompt, answer: value, choices: choices, explanation: "Use a_n = a_1 + (n-1)d.", difficulty: difficulty, topic: .algebraPatterning, subtopic: "Arithmetic Sequence", part: .partC)
+            let diff = Int.random(in: 2...5)
+            let n = Int.random(in: 8...20)
+            let sum = n * (2 * first + (n - 1) * diff) / 2
+            let prompt = "An arithmetic sequence has first term \(first) and common difference \(diff). The sum of the first n terms is \(sum). Find n."
+            let choices = shuffledOptions(correct: n, minValue: 1, spread: 6)
+            return makeQuestion(prompt: prompt, answer: n, choices: choices, explanation: "Use S_n = n/2 × (2a + (n−1)d) = \(sum) and solve the resulting quadratic for n.", difficulty: difficulty, topic: .algebraPatterning, subtopic: "Sum of Arithmetic Sequence", part: .partC)
         }
 
         if variant == 2 {
@@ -361,13 +366,17 @@ final class QuestionGenerator {
             return makeQuestion(prompt: prompt, answer: sum, choices: choices, explanation: "Evaluate and sum the first n terms.", difficulty: difficulty, topic: .algebraPatterning, subtopic: "Sequence Sums", part: .partC)
         }
 
-        let n = Int.random(in: 12...(40 + difficulty * 2))
-        let ruleA = Int.random(in: 2...5)
-        let ruleB = Int.random(in: 1...9)
-        let value = ruleA * n + ruleB
-        let prompt = "A pattern is defined by T(n) = \(ruleA)n + \(ruleB). What is T(\(n))?"
-        let choices = shuffledOptions(correct: value, spread: max(12, difficulty * 2))
-        return makeQuestion(prompt: prompt, answer: value, choices: choices, explanation: "Substitute n into the rule.", difficulty: difficulty, topic: .algebraPatterning, subtopic: "Modeling", part: .partC)
+        let qa = Int.random(in: 1...2)
+        let qb = Int.random(in: 1...4)
+        let qc = Int.random(in: 0...3)
+        let t1 = qa + qb + qc
+        let t2 = 4 * qa + 2 * qb + qc
+        let t3 = 9 * qa + 3 * qb + qc
+        let k = Int.random(in: 6...12)
+        let answer = qa * k * k + qb * k + qc
+        let prompt = "A quadratic pattern gives T(1) = \(t1), T(2) = \(t2), T(3) = \(t3). Find T(\(k))."
+        let choices = shuffledOptions(correct: answer, spread: max(15, difficulty * 3))
+        return makeQuestion(prompt: prompt, answer: answer, choices: choices, explanation: "Set T(n) = an² + bn + c, solve for a, b, c using T(1), T(2), T(3), then evaluate T(\(k)) = \(answer).", difficulty: difficulty, topic: .algebraPatterning, subtopic: "Quadratic Pattern", part: .partC)
     }
 
     private func partAData(difficulty: Int) -> GeneratedQuestion {
@@ -599,19 +608,32 @@ final class QuestionGenerator {
         }
 
         if variant == 6 {
-            let values = (0..<7).map { _ in Int.random(in: 5...(25 + difficulty * 2)) }.sorted()
-            let median = values[values.count / 2]
-            let prompt = "The sorted data set is \(values.map(String.init).joined(separator: ", ")). What is the median?"
-            let choices = shuffledOptions(correct: median, spread: max(5, difficulty))
-            return makeQuestion(prompt: prompt, answer: median, choices: choices, explanation: "With 7 values, the median is the 4th value.", difficulty: difficulty, topic: .dataManagementProbability, subtopic: "Median", part: .partC)
+            let total = Int.random(in: 6...9)
+            let totalWays = combination(total, 3)
+            let withBoth = total - 2
+            let answer = totalWays - withBoth
+            let prompt = "From \(total) students, a team of 3 is chosen. Two specific students refuse to be on the same team. How many valid teams are there?"
+            let choices = shuffledOptions(correct: answer, minValue: 1, spread: max(6, difficulty))
+            return makeQuestion(prompt: prompt, answer: answer, choices: choices, explanation: "Total ways: C(\(total),3) = \(totalWays). Teams including both: \(total)−2 = \(withBoth). Valid teams: \(totalWays)−\(withBoth) = \(answer).", difficulty: difficulty, topic: .dataManagementProbability, subtopic: "Combinatorics with Restrictions", part: .partC)
         }
 
-        let r1 = 1
-        let r2 = 5
-        let x = 8
-        let prompt = "Three circles have radii 1 cm, 5 cm, and x cm. If their mean area is 30pi cm^2, what is x?"
-        let choices = shuffledOptions(correct: x, spread: 8)
-        return makeQuestion(prompt: prompt, answer: x, choices: choices, explanation: "(1^2 + 5^2 + x^2)/3 = 30 gives x^2 = 64.", difficulty: difficulty, topic: .dataManagementProbability, subtopic: "Mean with Geometry", part: .partC)
+        // Committee counting with restriction (2022G8 Q24 style).
+        let boys = Int.random(in: 2...4)
+        let girls = Int.random(in: 3...5)
+        let size = boys + 1 // committee size
+        // Count committees of 'size' from (boys+girls) people with AT LEAST 2 girls.
+        let total_people = boys + girls
+        var validCommittees = 0
+        for g in 2...min(size, girls) {
+            let b = size - g
+            if b <= boys {
+                validCommittees += combination(girls, g) * combination(boys, b)
+            }
+        }
+        let totalCommittees = combination(total_people, size)
+        let prompt = "From a group of \(boys) boys and \(girls) girls, a committee of \(size) people is chosen at random. How many different committees include at least 2 girls?"
+        let choices = shuffledOptions(correct: validCommittees, minValue: 1, spread: max(5, validCommittees / 3))
+        return makeQuestion(prompt: prompt, answer: validCommittees, choices: choices, explanation: "Sum C(\(girls),g)×C(\(boys),\(size)-g) for g=2 to \(min(size,girls)). Total with at least 2 girls = \(validCommittees) (out of C(\(total_people),\(size))=\(totalCommittees)).", difficulty: difficulty, topic: .dataManagementProbability, subtopic: "Committee Counting", part: .partC)
     }
 
     private func makeQuestion(
@@ -665,5 +687,26 @@ final class QuestionGenerator {
         }
 
         return values.map(String.init).shuffled()
+    }
+
+    private func fibonacci(_ n: Int) -> Int {
+        guard n > 0 else { return 0 }
+        if n == 1 { return 1 }
+        var a = 1, b = 1
+        for _ in 3...n {
+            let c = a + b
+            a = b
+            b = c
+        }
+        return b
+    }
+
+    private func combination(_ n: Int, _ r: Int) -> Int {
+        guard r >= 0, r <= n else { return 0 }
+        var result = 1
+        for i in 0..<r {
+            result = result * (n - i) / (i + 1)
+        }
+        return result
     }
 }
